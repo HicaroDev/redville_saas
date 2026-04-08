@@ -22,19 +22,48 @@ function App() {
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
-    // Check current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    async function recoverSession() {
+      // 1. Check for custom Redville Session in LocalStorage (Bypass / DB Users)
+      const savedSession = localStorage.getItem('redville_session');
+      if (savedSession) {
+        setSession(JSON.parse(savedSession));
+        setInitializing(false);
+        return;
+      }
+
+      // 2. Check current Supabase Auth session
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+      if (authSession) {
+        setSession(authSession);
+      }
       setInitializing(false);
-    });
+    }
+
+    recoverSession();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
+      if (session) {
+        setSession(session);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleLoginSuccess = (user) => {
+    const newSession = { user };
+    setSession(newSession);
+    // Save to LocalStorage to persist across F5
+    localStorage.setItem('redville_session', JSON.stringify(newSession));
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setSession(null);
+    localStorage.removeItem('redville_session');
+    setActiveMenu('dashboard');
+  };
 
   const handleOpenProject = (code) => {
     setOpenProjectCode(code);
@@ -78,7 +107,7 @@ function App() {
         return <CadastroGeral type={targetType} />;
       case 'configuracoes':
       case 'configurações':
-        return <SettingsPage user={session.user} />;
+        return <SettingsPage user={session?.user} />;
       default:
         return <DashboardPage />;
     }
@@ -93,15 +122,16 @@ function App() {
   }
 
   if (!session) {
-    return <LoginPage onLoginSuccess={(user) => setSession({ user })} />;
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-50/30">
+    <div className="flex min-h-screen bg-slate-50/30 font-inter">
       <Sidebar activePage={activeMenu} onMenuChange={(id) => { setActiveMenu(id); setOpenProjectCode(null); }} />
       <div className="flex-1 lg:ml-64 transition-all duration-300">
         <Topbar
           user={session.user}
+          onLogout={handleLogout}
         />
         <main className="p-6 max-w-[1440px] mx-auto">
           {renderPage()}

@@ -71,7 +71,6 @@ export default function Sidebar({ activePage, onMenuChange }) {
             <SidebarItem icon={Wallet} label="Centros de Custo" active={activePage === 'centros-custo'} onClick={() => onMenuChange('centros-custo')} />
             <SidebarItem icon={History} label="Lançamentos" active={activePage === 'lancamentos'} onClick={() => onMenuChange('lancamentos')} />
             <SidebarItem icon={Calculator} label="Livro Caixa" active={activePage === 'livro-caixa'} onClick={() => onMenuChange('livro-caixa')} />
-            <SidebarItem icon={Users} label="Gestão de Usuários" active={activePage === 'usuarios'} onClick={() => onMenuChange('usuarios')} />
             
             <div className="space-y-1">
               <button 

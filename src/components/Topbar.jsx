@@ -1,9 +1,13 @@
 import { Search, Bell, ChevronDown, LogOut } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
-export default function Topbar({ user }) {
+export default function Topbar({ user, onLogout }) {
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    if (onLogout) {
+      onLogout();
+    } else {
+      await supabase.auth.signOut();
+    }
   };
 
   const userEmail = user?.email || 'Usuário';

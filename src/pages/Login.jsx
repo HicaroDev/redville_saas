@@ -52,12 +52,16 @@ export default function LoginPage({ onLoginSuccess }) {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 animate-in fade-in duration-500">
       <div className="w-full max-w-[420px] space-y-8">
         {/* LOGO AREA */}
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-3xl shadow-xl border border-slate-100 mb-2">
-            <Building2 className="w-10 h-10 text-red-700" />
+        <div className="text-center flex flex-col items-center mb-10">
+          <div className="w-16 h-16 bg-red-700 rounded-2xl flex items-center justify-center shadow-2xl shadow-red-700/30 rotate-3 mb-6 animate-in zoom-in duration-700">
+            <Building2 className="w-9 h-9 text-white -rotate-3" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">REDVILLE</h1>
-          <p className="text-slate-500 font-medium">Gestão Profissional de Obras</p>
+          <h1 className="text-4xl tracking-tighter text-slate-900 flex items-center gap-0.5">
+            <span className="font-semibold">RED</span>
+            <span className="font-light text-slate-400">VILLE</span>
+          </h1>
+          <div className="h-1 w-10 bg-red-700 rounded-full mt-1.5 opacity-80" />
+          <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-[0.3em] mt-4 opacity-60">SaaS Engenharia & Gestão</p>
         </div>
 
         {/* LOGIN CARD */}

@@ -78,7 +78,7 @@ function App() {
         return <CadastroGeral type={targetType} />;
       case 'configuracoes':
       case 'configurações':
-        return <SettingsPage />;
+        return <SettingsPage user={session.user} />;
       default:
         return <DashboardPage />;
     }

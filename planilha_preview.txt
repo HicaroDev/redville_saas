@@ -1,0 +1,116 @@
+=== TODAS AS ABAS: ["Etapas de obras","RESUMO","LISTA DE COMPRAS","CRONOGRAMA ","LIVRO CAIXA","GANTT"]
+
+
+========== ABA: Etapas de obras ==========
+Total de linhas: 57
+L0: [null,null,null,null,null,null,null,"TOTAL",445420.7,216106.73]
+L1: ["Galpão","Etapa","Subetapa","Descrição","Tipo","Unidade","Quantidade","Custo Unitário","Subtotal","Realizado","Fornecedor ","Data de entrega","Observações"]
+L2: ["GLP1/2/3","Demolição","1 Etapa ","Demolição da casa três ","LOC","Empreita",1,10000,10000,10000,null,46099]
+L3: ["GLP1/2/3","Demolição","2 Etapa","Máquina","LOC","dia",1,null,0]
+L4: ["GLP1/2/3","Projetos","Arq/ Complementares","Projetos","MAT","serviço",1,null,0]
+L5: ["GLP1/2/3","Documentos","Art","Responsabilidade e de Projeto Arquitetonico","TAR","bol",2,190,380]
+L6: ["GLP1/2/3","Placa de Obra","Divugalção","Placa de divugação ","Art","un",1,500,500]
+L7: ["GLP1/2/3","Demarcação","Nivel","Retirar nivel do Terreno","MO/MAT","dia",1,null,0]
+L8: ["GLP1/2/3","Topografia","Projetos","Planaltimetrico ","MO","Empreita",1,1250,1250]
+L9: ["GLP1/2/3","Terraplanagem","Equipamento","Máquinas","LOC","dia",1,null,0]
+L10: ["GLP1/2/3","Terraplanagem","Equipamento","BobCat","LOC","dia",2]
+L11: ["GLP1/2/3","Terraplanagem","Transporte","Caminhão terra","LOC","viagem",35,300,10500]
+L12: ["GLP1/2/3","Fundação","Estacas","Estacas 3m (25 com 6 barras de 8mm)","MAT","un",28,75,2100,2377.2]
+L13: ["GLP1/2/3","Fundação","Blocos","Blocos 60x60x50","MAT","un",28,105,2940,2237.2]
+L14: ["GLP1/2/3","Fundação","Chumbadores","Chapa base 12mm + chumbadores","MAT","un",28,106,2968,3637.2]
+---
+
+========== ABA: RESUMO ==========
+Total de linhas: 27
+L0: ["Resumo"]
+L1: []
+L2: ["Descrição","-"]
+L3: ["GLP1",300]
+L4: ["GLP2",300]
+L5: ["GLP3",300]
+L6: ["m²",900]
+L7: ["Altura",7.5]
+L8: ["valor",445420.7]
+L9: ["Valor m²",494.9118888888889]
+L10: []
+L11: []
+L12: ["Pilares de 9m",8," 200x150"]
+L13: ["Pilares de 7,5",24,"200x15"]
+L14: ["Tesouras",12,"150x142"]
+---
+
+========== ABA: LISTA DE COMPRAS ==========
+Total de linhas: 29
+L0: ["Lista de materias "]
+L1: []
+L2: []
+L3: ["Etapa ","Desrição","Quantidade ","Tipo","Data Inicio","Data final","Data de entrega"]
+L4: ["Demarcação","Pontalete 1,5m ",2,"UM"]
+L5: ["Demarcação","Pontalete 30cm",6,"UM"]
+L6: ["Demarcação","Mangueira de nivel ",30,"Metros"]
+L7: ["Demarcação","Marreta",1,"um"]
+L8: ["Demarcação","Prego 17/30",1,"KG"]
+L9: ["Fundação"]
+L10: ["Fundação"]
+L11: ["Fundação"]
+L12: ["Fundação"]
+L13: ["Fundação"]
+L14: ["Estrutura metalica"]
+---
+
+========== ABA: CRONOGRAMA  ==========
+Total de linhas: 59
+L0: ["ID","WBS","Nível","Lote","Galpão","Etapa","Duração (dias)","Predecessora (ID)","Data Início Planejada","Data Fim Planejada","% Concluído","Status","Responsável","Custo Estimado","Data Início Real","Data Fim Real","Observações","Folga (dias)","Crítico"]
+L1: [1,"1.0",1,"07","GLP1","Demolição",3,null,46099,46101,1,"Concluída",null,null,null,null,null,10,"NÃO"]
+L2: [2,"2.0",1,"07","GLP1","Projetos",7,1,46102,46108,1,"Concluída",null,null,null,null,null,3,"NÃO"]
+L3: [3,"3.0",1,"07","GLP1","Documentos",3,2,46109,46111,0.5,"Em andamento",null,null,null,null,null,0,"SIM"]
+L4: [4,"4.0",1,"07","GLP1","Placa de Obra",2,3,46112,46113,0.5,"Não iniciada",null,null,null,null,null,0,"SIM"]
+L5: [5,"5.0",1,"07","GLP1","Demarcação",2,2,46104,46111,1,"Concluída",null,null,null,null,null,0,"SIM"]
+L6: [6,"6.0",1,"07","GLP1","Topografia",3,5,46104,46106,1,"Concluída",null,null,null,null,null,5,"NÃO"]
+L7: [7,"7.0",1,"07","GLP1","Terraplanagem",2,6,46105,46106,0.5,"Atrasada",null,null,null,null,null,5,"NÃO"]
+L8: [8,"8.0",1,"07","GLP1","Fundação",5,7,46111,46115,0.1,"Em andamento",null,null,null,null,null,0,"SIM"]
+L9: [9,"9.0",1,"07","GLP1","Estrutura Metálica",14,8,46109,46122,0.75,"Em andamento","David Serralheiro",null,null,null,null,0,"SIM"]
+L10: [10,"10.0",1,"07","GLP1","Alvenaria",21,8,46116,46136,0,"Não iniciada",null,null,null,null,null,0,"SIM"]
+L11: [11,"11.0",1,"07","GLP1","Infra Pluvial",3,8,46116,46118,0,"Não iniciada",null,null,null,null,null,0,"SIM"]
+L12: [12,"12.0",1,"07","GLP1","Infra Esgoto",3,11,46119,46121,0,"Não iniciada",null,null,null,null,null,0,"SIM"]
+L13: [13,"13.0",1,"07","GLP1","Infra Hidráulica",2,12,46122,46123,0,"Não iniciada",null,null,null,null,null,0,"SIM"]
+L14: [14,"14.0",1,"07","GLP1","Infra Elétrica",2,11,46119,46120,0,"Não iniciada",null,null,null,null,null,0,"SIM"]
+---
+
+========== ABA: LIVRO CAIXA ==========
+Total de linhas: 100
+L0: ["Livro Caixa"]
+L1: []
+L2: ["Entrada","Saidas ","Saldo"]
+L3: [0,188955.87000000002,-188955.87000000002]
+L4: []
+L5: ["ID","Data","Descrição","Origem Entrada","Entrada ","Origem Saída","UN","Valor UN","Saida","Obs"]
+L6: [1,46102,"Projetos Vitor",null,null,"Elton PIX",1,2500,2500]
+L7: [2,46104,"ART Complementares",null,null,"Elton PIX",1,108.39,108.39]
+L8: [3,46101,"Gasolina Hícaro",null,null,"Elton DÉBITO",1,100,100]
+L9: [4,46099,"1a Etapa Demolição ",null,null,"Elton DINHEIRO",1,10000,10000]
+L10: [5,46101,"CIMENTO CSN 50KG",null,null,"Elton PIX",500,34.5,17250]
+L11: [6,46104,"AREIA MÉDIA",null,null,"Elton PIX",3,1900,5700]
+L12: [7,46104,"BRITA 0",null,null,"Elton PIX",2,1850,3700]
+L13: [8,46104,"TELHA 50%",null,null,"Elton DINHEIRO",1,47361,47361]
+L14: [9,46104,"BLOCO 50%",null,null,"Elton DINHEIRO",1,15747.55,15747.55]
+---
+
+========== ABA: GANTT ==========
+Total de linhas: 24
+L0: ["CRONOGRAMA GANTT – OBRA DOS GALPÕES 07, 08 E 09"]
+L1: ["Barras: azul = planejado | verde = concluído | linha vermelha = hoje"]
+L2: ["ID","Lote","Galpão","Etapa","Início","Fim","%","Status","MAR/2026",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"APR/2026",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"MAY/2026",null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,"JUN/2026"]
+L3: [null,null,null,null,null,null,null,null,"S","M","T","W","T","F","S","S","M","T","W","T","F","S","S","M","T","W","T","F","S","S","M","T","W","T","F","S","S","M","T","W","T","F","S","S","M","T","W","T","F","S","S","M","T","W","T","F","S","S","M","T","W","T","F","S","S","M","T","W","T","F","S","S","M","T","W","T","F","S","S","M","T","W","T","F","S","S","M","T","W","T","F","S","S","M","T","W","T","F","S","S","M"]
+L4: [null,null,null,null,null,null,null,null,46096,46097,46098,46099,46100,46101,46102,46103,46104,46105,46106,46107,46108,46109,46110,46111,46112,46113,46114,46115,46116,46117,46118,46119,46120,46121,46122,46123,46124,46125,46126,46127,46128,46129,46130,46131,46132,46133,46134,46135,46136,46137,46138,46139,46140,46141,46142,46143,46144,46145,46146,46147,46148,46149,46150,46151,46152,46153,46154,46155,46156,46157,46158,46159,46160,46161,46162,46163,46164,46165,46166,46167,46168,46169,46170,46171,46172,46173,46174,46175,46176,46177,46178,46179,46180,46181,46182,46183,46184,46185,46186,46187,46188]
+L5: [1,"07","GLP1","Demolição",46099,46101,1,"Concluída","","","",1,1,1,"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
+L6: [2,"07","GLP1","Projetos",46102,46108,1,"Concluída","","","","","","",1,1,1,1,1,1,1,"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
+L7: [3,"07","GLP1","Documentos",46109,46111,0,"Em andamento","","","","","","","","","","","","","",1,1,1,"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
+L8: [4,"07","GLP1","Placa de Obra",46108,46111,1,"Concluída","","","","","","","","","","","","",1,1,1,1,"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
+L9: [5,"07","GLP1","Demarcação",46104,46105,1,"Concluída","","","","","","","","",1,1,"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
+L10: [6,"07","GLP1","Topografia",46104,46106,1,"Concluída","","","","","","","","",1,1,1,"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
+L11: [7,"07","GLP1","Terraplanagem",46105,46106,0.5,"Atrasada","","","","","","","","","",1,1,"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
+L12: [8,"07","GLP1","Fundação",46111,46115,0,"Em andamento","","","","","","","","","","","","","","","",1,1,1,1,1,"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
+L13: [9,"07","GLP1","Estrutura Metálica",46109,46122,0,"Em andamento","","","","","","","","","","","","","",1,1,1,1,1,1,1,1,1,1,1,1,1,1,"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
+L14: [10,"07","GLP1","Alvenaria",46116,46136,0,"Não iniciada","","","","","","","","","","","","","","","","","","","","",1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]
+---

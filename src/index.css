@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Surfaces */
+  --surface-base: #F8F9FA;
+  --surface-card: #FFFFFF;
+  --surface-hover: #F1F5F9;
+
+  /* Brand Colors (Redville Red) */
+  --primary: #B91C1C;
+  --primary-dark: #991B1B;
+  --primary-light: #FCA5A5;
+
+  /* Text & Scales */
+  --text-main: #1E293B;
+  --text-label: #64748B;
+  --text-muted: #94A3B8;
+
+  /* Borders & Radius */
+  --radius-pro: 12px;
+  --border-main: #E2E8F0;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--surface-base);
+  color: var(--text-main);
+  font-size: 14px;
+}
+
+/* Redville Standard Components */
+.rv-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-main);
+  border-radius: var(--radius-pro);
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.rv-header {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.025em;
+}
+
+.rv-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-label);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn-primary-gradient {
+  background: var(--primary);
+  color: white;
+  padding: 0.5rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 150ms;
+}
+
+.btn-primary-gradient:hover {
+  background: var(--primary-dark);
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--border-main);
+  border-radius: 8px;
+  background: white;
+  outline: none;
+}
+
+.form-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(185, 28, 28, 0.1);
+}

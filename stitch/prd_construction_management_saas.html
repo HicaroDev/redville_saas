@@ -1,0 +1,71 @@
+# PRD: Construction Management SaaS (StitchCon)
+
+## 1. Project Overview
+A modern, minimalist SaaS platform for construction management, targeting engineers, managers, and financial staff. The goal is to provide a high-clarity interface for operational and financial oversight.
+
+## 2. Target Audience
+- **Engineers:** Need to track physical progress and "Evolução da Obra".
+- **Construction Managers:** Need a high-level overview of all projects and alerts.
+- **Financial/Admin Staff:** Need to manage costs (Centros de Custo), entries (Lançamentos), and cash flow (Livro Caixa).
+
+## 3. Design Principles
+- **Minimalism:** Inspired by Stripe/Linear. High white space, clean typography.
+- **Hierarchy:** Clear visual weight using neutral tones and a single primary accent.
+- **Responsiveness:** Desktop-first, but fully optimized for mobile/tablet.
+- **Decision-Focused:** Every screen must answer: "What decision can the user make here?"
+
+## 4. Information Architecture
+### Navigation (Sidebar)
+1. Dashboard
+2. Obras (Projects)
+3. Centros de Custo
+4. Lançamentos
+5. Livro Caixa
+6. Evolução da Obra
+7. Relatórios
+8. Compras (Future)
+9. Estoque (Future)
+10. RDO (Future)
+
+### Global Elements (Topbar)
+- Global Search
+- Notifications
+- User Profile
+- **Project Selector:** A persistent dropdown to switch context between different "Obras".
+
+## 5. Screen Specifications
+### 1. Dashboard (Home)
+- **KPIs:** Total Projects, Total Cost, Cash Balance, Avg. Execution %.
+- **Charts:** Planned vs. Actual cost comparison.
+- **Table:** Active projects with status and progress.
+- **Alerts:** Cost deviation highlights.
+
+### 2. Obras (Project List)
+- High-level table of all projects with financial and physical progress markers.
+- Primary CTA: "+ Nova Obra".
+
+### 3. Detalhe da Obra (Tabbed View)
+- **Visão Geral:** Summary and progress bars.
+- **Centros de Custo:** Hierarchical cost breakdown.
+- **Lançamentos:** List of expenses with filters.
+- **Evolução:** Physical vs. Financial charts.
+
+### 4. Centros de Custo
+- Tree structure for managing the hierarchy of costs.
+
+### 5. Lançamentos
+- Form for adding new expenses (Obra, Cost Center, Type, Value, Date).
+- Filterable list of all entries.
+
+### 6. Livro Caixa
+- Consolidated table of Inflow/Outflow and balance.
+- Timeline/Calendar view.
+
+### 7. Evolução da Obra
+- Comparative visualization of Physical % vs. Financial %.
+
+## 6. Visual Style Guide
+- **Palette:** Neutral grays (#F9FAFB background), Slate/Charcoal for text, Primary Blue (#2563EB) for accents.
+- **Radius:** 12px - 16px.
+- **Shadows:** Soft, subtle elevation (Indigo/Slate tinted).
+- **Typography:** Inter or similar clean sans-serif.

@@ -1,0 +1,9 @@
+node_modules
+.env
+.eenv
+dist
+.vscode
+.DS_Store
+*.xlsx
+~$*.xlsx
+tmp

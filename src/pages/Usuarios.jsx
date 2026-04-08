@@ -8,19 +8,35 @@ const ROLES = {
   viewer: { label: 'Visualizador', color: 'text-slate-600 bg-slate-50' }
 };
 
-function PermissionBox({ label, modules }) {
+const DEFAULT_PERMISSIONS = {
+  obras: ['Visualizar', 'Criar', 'Editar Orçamento'],
+  financeiro: ['Lançamentos', 'Livro Caixa', 'Pagamentos'],
+  config: ['Usuários', 'Cadastros', 'Configurações']
+};
+
+function PermissionBox({ label, category, modules, selectedPermissions, togglePermission }) {
   return (
     <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
        <p className="text-[10px] font-bold text-slate-800 uppercase mb-3 border-b border-slate-50 pb-2">{label}</p>
        <div className="space-y-2">
-          {modules.map(m => (
-            <label key={m} className="flex items-center gap-2 cursor-pointer group">
-               <div className="w-4 h-4 rounded border border-slate-300 flex items-center justify-center group-hover:border-red-500 transition-colors">
-                  <CheckSquare className="w-3 h-3 text-red-500 opacity-0 group-hover:opacity-10" />
-               </div>
-               <span className="text-xs text-slate-500 group-hover:text-slate-700 transition-colors">{m}</span>
-            </label>
-          ))}
+          {modules.map(m => {
+            const isChecked = selectedPermissions[category]?.includes(m);
+            return (
+              <label key={m} className="flex items-center gap-2 cursor-pointer group">
+                 <input 
+                   type="checkbox"
+                   className="hidden"
+                   checked={isChecked}
+                   onChange={() => togglePermission(category, m)}
+                 />
+                 <div className={`w-4 h-4 rounded border transition-all flex items-center justify-center 
+                   ${isChecked ? 'bg-red-600 border-red-600 shadow-sm shadow-red-200' : 'border-slate-300 bg-white group-hover:border-red-400'}`}>
+                    {isChecked && <CheckSquare className="w-3 h-3 text-white" />}
+                 </div>
+                 <span className={`text-xs transition-colors ${isChecked ? 'text-slate-900 font-bold' : 'text-slate-500 group-hover:text-slate-700'}`}>{m}</span>
+              </label>
+            );
+          })}
        </div>
     </div>
   );
@@ -37,7 +53,12 @@ export default function UsuariosPage() {
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
-    role: 'viewer'
+    role: 'viewer',
+    permissions: {
+      obras: ['Visualizar'],
+      financeiro: [],
+      config: []
+    }
   });
 
   useEffect(() => {
@@ -55,6 +76,21 @@ export default function UsuariosPage() {
     setLoading(false);
   };
 
+  const togglePermission = (category, module) => {
+    const current = formData.permissions[category] || [];
+    const updated = current.includes(module) 
+      ? current.filter(m => m !== module)
+      : [...current, module];
+    
+    setFormData({
+      ...formData,
+      permissions: {
+        ...formData.permissions,
+        [category]: updated
+      }
+    });
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -65,7 +101,7 @@ export default function UsuariosPage() {
 
     if (!error) {
       setSuccessMsg(true);
-      setFormData({ full_name: '', email: '', role: 'viewer' });
+      setFormData({ full_name: '', email: '', role: 'viewer', permissions: { obras: ['Visualizar'], financeiro: [], config: [] } });
       fetchUsers();
       setTimeout(() => {
         setSuccessMsg(false);
@@ -85,21 +121,20 @@ export default function UsuariosPage() {
           <p className="text-sm text-slate-500 mt-1">Níveis de acesso e permissões granulares</p>
         </div>
         {!showForm && (
-          <button onClick={() => setShowForm(true)} className="btn-primary-gradient flex items-center gap-2 shadow-lg shadow-red-100">
+          <button onClick={() => setShowForm(true)} className="btn-primary-gradient flex items-center gap-2 shadow-lg shadow-red-100 font-bold">
             <Plus className="w-4 h-4" /> Novo Usuário
           </button>
         )}
       </div>
 
-      {/* FEEDBACK SUCCESS MESSAGE */}
       {successMsg && (
-        <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+        <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 shadow-sm">
            <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-200">
               <CheckCircle2 className="w-5 h-5" />
            </div>
            <div>
               <p className="text-sm font-bold text-emerald-900">Usuário Criado com Sucesso!</p>
-              <p className="text-xs text-emerald-600">O novo membro já aparece na lista abaixo.</p>
+              <p className="text-xs text-emerald-600">As permissões granulares foram registradas.</p>
            </div>
         </div>
       )}
@@ -107,17 +142,17 @@ export default function UsuariosPage() {
       {showForm && (
         <div className="bg-white rounded-3xl p-8 shadow-xl border border-red-50 animate-in fade-in slide-in-from-top-4">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-red-50 text-red-700 rounded-xl flex items-center justify-center shadow-sm">
               <UserCheck className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-slate-800">Convidar Novo Usuário</h3>
+            <h3 className="text-lg font-bold text-slate-800 tracking-tight">Convidar Novo Usuário</h3>
           </div>
 
           <form onSubmit={handleSave}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase">Nome Completo</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Nome Completo</label>
                   <input 
                     type="text" 
                     required
@@ -128,7 +163,7 @@ export default function UsuariosPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase">E-mail Corporativo</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">E-mail Corporativo</label>
                   <input 
                     type="email" 
                     required
@@ -139,9 +174,9 @@ export default function UsuariosPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase">Perfil de Acesso</label>
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Perfil de Acesso</label>
                   <select 
-                    className="form-input"
+                    className="form-input font-semibold"
                     value={formData.role}
                     onChange={(e) => setFormData({...formData, role: e.target.value})}
                   >
@@ -153,11 +188,29 @@ export default function UsuariosPage() {
               </div>
 
               <div className="md:col-span-2 bg-slate-50/50 rounded-2xl p-6 border border-slate-100">
-                 <h4 className="text-[10px] font-bold text-slate-400 uppercase mb-4 tracking-widest">Acessos por Módulo</h4>
+                 <h4 className="text-[10px] font-bold text-slate-400 uppercase mb-4 tracking-widest">Acessos Granulares (Menu)</h4>
                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-slate-600">
-                    <PermissionBox label="Obras" modules={['Visualizar', 'Criar', 'Editar Orçamento']} />
-                    <PermissionBox label="Financeiro" modules={['Lançamentos', 'Livro Caixa', 'Pagamentos']} />
-                    <PermissionBox label="Config" modules={['Usuários', 'Cadastros', 'Configurações']} />
+                    <PermissionBox 
+                      label="Obras" 
+                      category="obras"
+                      modules={DEFAULT_PERMISSIONS.obras} 
+                      selectedPermissions={formData.permissions}
+                      togglePermission={togglePermission}
+                    />
+                    <PermissionBox 
+                      label="Financeiro" 
+                      category="financeiro"
+                      modules={DEFAULT_PERMISSIONS.financeiro} 
+                      selectedPermissions={formData.permissions}
+                      togglePermission={togglePermission}
+                    />
+                    <PermissionBox 
+                      label="Config" 
+                      category="config"
+                      modules={DEFAULT_PERMISSIONS.config} 
+                      selectedPermissions={formData.permissions}
+                      togglePermission={togglePermission}
+                    />
                  </div>
               </div>
             </div>
@@ -175,7 +228,7 @@ export default function UsuariosPage() {
                 disabled={saving}
                 className="btn-primary-gradient px-8 flex items-center gap-2"
               >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar e Notificar'}
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar e Ativar Acesso'}
               </button>
             </div>
           </form>
@@ -186,16 +239,16 @@ export default function UsuariosPage() {
         {loading ? (
           <div className="p-20 flex flex-col items-center justify-center gap-4">
              <Loader2 className="w-10 h-10 text-red-700 animate-spin" />
-             <p className="text-sm font-medium text-slate-400">Carregando membros da equipe...</p>
+             <p className="text-sm font-medium text-slate-400 uppercase tracking-widest">Sincronizando equipe...</p>
           </div>
         ) : (
           <table className="w-full">
             <thead>
               <tr className="bg-slate-50/50">
-                <th className="text-left text-[11px] font-bold text-slate-400 uppercase py-4 px-8">Membro</th>
-                <th className="text-left text-[11px] font-bold text-slate-400 uppercase py-4 px-8">Perfil</th>
-                <th className="text-left text-[11px] font-bold text-slate-400 uppercase py-4 px-8">Status</th>
-                <th className="text-right text-[11px] font-bold text-slate-400 uppercase py-4 px-8">Ações</th>
+                <th className="text-left text-[11px] font-bold text-slate-400 uppercase py-4 px-8 tracking-widest">Membro / E-mail</th>
+                <th className="text-left text-[11px] font-bold text-slate-400 uppercase py-4 px-8 tracking-widest">Perfil</th>
+                <th className="text-left text-[11px] font-bold text-slate-400 uppercase py-4 px-8 tracking-widest">Acessos</th>
+                <th className="text-right text-[11px] font-bold text-slate-400 uppercase py-4 px-8 tracking-widest">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -203,37 +256,42 @@ export default function UsuariosPage() {
                 <tr key={user.id} className="hover:bg-slate-50/30 transition-colors">
                   <td className="py-4 px-8">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-500 font-bold">
+                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-500 font-bold shadow-inner">
                          {user.full_name?.charAt(0) || '?'}
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-slate-800">{user.full_name}</p>
-                        <p className="text-[10px] text-slate-400 font-medium">{user.email}</p>
+                        <p className="text-sm font-bold text-slate-800 leading-none">{user.full_name}</p>
+                        <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-tight">{user.email}</p>
                       </div>
                     </div>
                   </td>
                   <td className="py-4 px-8">
-                    <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase ${ROLES[user.role]?.color || 'bg-slate-50 text-slate-400'}`}>
+                    <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${ROLES[user.role]?.color || 'bg-slate-50 text-slate-400'}`}>
                       {ROLES[user.role]?.label || 'Visualizador'}
                     </span>
                   </td>
                   <td className="py-4 px-8">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-1.5 h-1.5 rounded-full ${user.active ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-300'}`}></div>
-                      <span className="text-[10px] text-slate-500 font-bold uppercase">{user.active ? 'Ativo' : 'Inativo'}</span>
+                    <div className="flex items-center gap-1 flex-wrap">
+                       {Object.keys(user.permissions || {}).map(cat => (
+                         user.permissions[cat].length > 0 && (
+                           <span key={cat} className="text-[10px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                             {cat}
+                           </span>
+                         )
+                       ))}
                     </div>
                   </td>
                   <td className="py-4 px-8 text-right">
                      <div className="flex justify-end gap-1">
-                        <button className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"><Edit3 className="w-4 h-4" /></button>
-                        <button className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"><Trash2 className="w-4 h-4" /></button>
+                        <button className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all shadow-sm"><Edit3 className="w-4 h-4" /></button>
+                        <button className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all shadow-sm"><Trash2 className="w-4 h-4" /></button>
                      </div>
                   </td>
                 </tr>
               ))}
               {users.length === 0 && (
                 <tr>
-                  <td colSpan="4" className="py-20 text-center text-slate-400 text-sm font-medium italic">Nenhum membro cadastrado.</td>
+                  <td colSpan="4" className="py-20 text-center text-slate-300 text-sm font-bold uppercase tracking-widest italic opacity-50">Nenhum membro na base de dados</td>
                 </tr>
               )}
             </tbody>

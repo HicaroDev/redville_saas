@@ -40,7 +40,7 @@ export default function LoginPage({ onLoginSuccess }) {
       password,
     });
 
-    if (error) {
+    if (authError) {
       setError('Acesso negado. Verifique suas credenciais.');
       setLoading(false);
     } else {
@@ -49,88 +49,95 @@ export default function LoginPage({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4 animate-in fade-in duration-500 overflow-hidden">
-      {/* BACKGROUND WALLPAPER */}
-      <div 
-        className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-[10s] hover:scale-110"
-        style={{ backgroundImage: 'url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZP25zdEQgwU0qE5AIrgvU8KN-EIyfaUF4tw&s")' }}
-      />
-      {/* OVERLAY */}
-      <div className="absolute inset-0 z-0 bg-slate-900/60 backdrop-blur-[2px]" />
+    <div className="min-h-screen flex flex-col lg:flex-row bg-white overflow-hidden animate-in fade-in duration-500">
+      {/* LEFT SIDE: THE IMAGE BOX */}
+      <div className="hidden lg:block lg:w-[45%] relative overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-[20s] hover:scale-110"
+          style={{ backgroundImage: 'url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZP25zdEQgwU0qE5AIrgvU8KN-EIyfaUF4tw&s")' }}
+        />
+        {/* RED OVERLAY SUTTLE */}
+        <div className="absolute inset-0 bg-red-900/10 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/10" />
+      </div>
 
-      <div className="w-full max-w-[420px] space-y-8 relative z-10 transition-all">
-        {/* LOGO AREA */}
-        <div className="text-center flex flex-col items-center mb-10">
-          <img 
-            src="/logo.png" 
-            alt="Redville Obras" 
-            className="h-48 w-auto animate-in zoom-in duration-700 drop-shadow-[0_20px_20px_rgba(0,0,0,0.5)]" 
-          />
-          <div className="h-1.5 w-16 bg-red-700 rounded-full mt-6 shadow-lg shadow-red-700/50" />
-          <p className="text-[12px] text-white font-semibold uppercase tracking-[0.4em] mt-4 opacity-90 drop-shadow-md">Engenharia & Gestão Profissional</p>
-        </div>
-
-        {/* LOGIN CARD */}
-        <div className="bg-white p-8 rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-full -mr-16 -mt-16 opacity-50 blur-2xl" />
+      {/* RIGHT SIDE: THE LOGIN CONTENT */}
+      <div className="flex-1 flex items-center justify-center p-8 bg-slate-50/50">
+        <div className="w-full max-w-[420px] space-y-8 relative z-10">
           
-          <form onSubmit={handleLogin} className="space-y-6 relative z-10">
-            <div className="space-y-2">
-               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Seu E-mail</label>
-               <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input 
-                    type="email" 
-                    required 
-                    className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-red-600/20 focus:bg-white transition-all outline-none text-slate-800 font-medium"
-                    placeholder="email@redville.com.br"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-               </div>
-            </div>
+          {/* LOGO AREA */}
+          <div className="text-center flex flex-col items-center mb-6">
+            <img 
+              src="/logo.png" 
+              alt="Redville Obras" 
+              className="h-40 w-auto drop-shadow-xl animate-in slide-in-from-top-4 duration-700 font-inter" 
+            />
+            <div className="h-1.5 w-12 bg-red-700 rounded-full mt-4 shadow-lg shadow-red-700/20" />
+            <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-[0.4em] mt-3 opacity-80">Engenharia & Gestão Profissional</p>
+          </div>
 
-            <div className="space-y-2">
-               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Sua Senha</label>
-               <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input 
-                    type="password" 
-                    required 
-                    className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-red-600/20 focus:bg-white transition-all outline-none text-slate-800 font-medium"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-               </div>
-            </div>
-
-            {error && (
-              <div className="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl text-center animate-in slide-in-from-top-1">
-                {error}
+          {/* LOGIN CARD */}
+          <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl shadow-slate-200/60 border border-slate-100 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-red-50 rounded-full -mr-16 -mt-16 opacity-40 blur-3xl" />
+            
+            <form onSubmit={handleLogin} className="space-y-6 relative z-10">
+              <div className="space-y-2">
+                 <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1">E-mail de Acesso</label>
+                 <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                    <input 
+                      type="email" 
+                      required 
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50/50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-red-600/20 focus:bg-white transition-all outline-none text-slate-800 font-medium"
+                      placeholder="admin@redville.com.br"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                 </div>
               </div>
-            )}
 
-            <button 
-              disabled={loading}
-              type="submit" 
-              className="w-full btn-primary-gradient py-4 flex items-center justify-center gap-3 group"
-            >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  <span className="font-bold">Acessar Sistema</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </>
+              <div className="space-y-2">
+                 <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1">Sua Senha</label>
+                 <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                    <input 
+                      type="password" 
+                      required 
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50/50 border border-slate-100 rounded-2xl focus:ring-2 focus:ring-red-600/20 focus:bg-white transition-all outline-none text-slate-800 font-medium"
+                      placeholder="••••••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                 </div>
+              </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 text-red-700 text-[11px] font-bold rounded-xl text-center border border-red-100 animate-pulse">
+                  {error}
+                </div>
               )}
-            </button>
-          </form>
-        </div>
 
-        <p className="text-center text-slate-400 text-xs font-medium">
-          Redville Obras SaaS © 2026 • Todos os direitos reservados
-        </p>
+              <button 
+                disabled={loading}
+                type="submit" 
+                className="w-full btn-primary-gradient py-4 flex items-center justify-center gap-3 group shadow-xl shadow-red-100 font-semibold"
+              >
+                {loading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <>
+                    <span className="uppercase tracking-widest text-xs">Entrar no Painel</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          <p className="text-center text-slate-300 text-[10px] font-semibold uppercase tracking-widest opacity-60">
+            Redville Obras SaaS • 2026 
+          </p>
+        </div>
       </div>
     </div>
   );

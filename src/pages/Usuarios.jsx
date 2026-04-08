@@ -48,6 +48,7 @@ export default function UsuariosPage() {
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
   const [users, setUsers] = useState([]);
+  const [editingUserId, setEditingUserId] = useState(null);
   
   // Form State
   const [formData, setFormData] = useState({
@@ -91,37 +92,66 @@ export default function UsuariosPage() {
     });
   };
 
+  const handleEdit = (user) => {
+    setEditingUserId(user.id);
+    setFormData({
+      full_name: user.full_name,
+      email: user.email,
+      role: user.role,
+      permissions: user.permissions || { obras: ['Visualizar'], financeiro: [], config: [] }
+    });
+    setShowForm(true);
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
     
     const { error } = await supabase
       .from('profiles')
-      .insert([formData]);
+      .upsert({
+        ...(editingUserId ? { id: editingUserId } : {}),
+        ...formData
+      });
 
     if (!error) {
       setSuccessMsg(true);
-      setFormData({ full_name: '', email: '', role: 'viewer', permissions: { obras: ['Visualizar'], financeiro: [], config: [] } });
+      resetForm();
       fetchUsers();
       setTimeout(() => {
         setSuccessMsg(false);
         setShowForm(false);
       }, 2000);
     } else {
-      alert('Erro ao criar usuário: ' + error.message);
+      alert('Erro ao salvar usuário: ' + error.message);
     }
     setSaving(false);
+  };
+
+  const resetForm = () => {
+    setFormData({ full_name: '', email: '', role: 'viewer', permissions: { obras: ['Visualizar'], financeiro: [], config: [] } });
+    setEditingUserId(null);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Tem certeza que deseja remover este usuário?')) {
+      const { error } = await supabase.from('profiles').delete().eq('id', id);
+      if (!error) fetchUsers();
+    }
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Gestão de Usuários</h1>
-          <p className="text-sm text-slate-500 mt-1">Níveis de acesso e permissões granulares</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Gestão de Usuários</h1>
+          <p className="text-sm text-slate-500 mt-1 font-medium">Níveis de acesso e permissões granulares</p>
         </div>
         {!showForm && (
-          <button onClick={() => setShowForm(true)} className="btn-primary-gradient flex items-center gap-2 shadow-lg shadow-red-100 font-bold">
+          <button 
+            onClick={() => { resetForm(); setShowForm(true); }} 
+            className="btn-primary-gradient flex items-center gap-2 shadow-lg shadow-red-100 font-bold"
+          >
             <Plus className="w-4 h-4" /> Novo Usuário
           </button>
         )}
@@ -133,8 +163,8 @@ export default function UsuariosPage() {
               <CheckCircle2 className="w-5 h-5" />
            </div>
            <div>
-              <p className="text-sm font-bold text-emerald-900">Usuário Criado com Sucesso!</p>
-              <p className="text-xs text-emerald-600">As permissões granulares foram registradas.</p>
+              <p className="text-sm font-bold text-emerald-900">Usuário {editingUserId ? 'Atualizado' : 'Criado'} com Sucesso!</p>
+              <p className="text-xs text-emerald-600">As configurações foram aplicadas à base de dados.</p>
            </div>
         </div>
       )}
@@ -143,9 +173,11 @@ export default function UsuariosPage() {
         <div className="bg-white rounded-3xl p-8 shadow-xl border border-red-50 animate-in fade-in slide-in-from-top-4">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 bg-red-50 text-red-700 rounded-xl flex items-center justify-center shadow-sm">
-              <UserCheck className="w-5 h-5" />
+              {editingUserId ? <Edit3 className="w-5 h-5" /> : <UserCheck className="w-5 h-5" />}
             </div>
-            <h3 className="text-lg font-bold text-slate-800 tracking-tight">Convidar Novo Usuário</h3>
+            <h3 className="text-lg font-bold text-slate-800 tracking-tight">
+              {editingUserId ? 'Editar Permissões de Usuário' : 'Convidar Novo Usuário'}
+            </h3>
           </div>
 
           <form onSubmit={handleSave}>
@@ -176,7 +208,7 @@ export default function UsuariosPage() {
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Perfil de Acesso</label>
                   <select 
-                    className="form-input font-semibold"
+                    className="form-input font-bold"
                     value={formData.role}
                     onChange={(e) => setFormData({...formData, role: e.target.value})}
                   >
@@ -218,7 +250,7 @@ export default function UsuariosPage() {
             <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-slate-100">
               <button 
                 type="button" 
-                onClick={() => setShowForm(false)} 
+                onClick={() => { setShowForm(false); resetForm(); }} 
                 className="px-6 py-2 text-sm font-bold text-slate-400 hover:text-slate-600"
               >
                 Cancelar
@@ -228,7 +260,7 @@ export default function UsuariosPage() {
                 disabled={saving}
                 className="btn-primary-gradient px-8 flex items-center gap-2"
               >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar e Ativar Acesso'}
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : (editingUserId ? 'Atualizar Usuário' : 'Salvar e Ativar Acesso')}
               </button>
             </div>
           </form>
@@ -253,10 +285,10 @@ export default function UsuariosPage() {
             </thead>
             <tbody className="divide-y divide-slate-50">
               {users.map(user => (
-                <tr key={user.id} className="hover:bg-slate-50/30 transition-colors">
+                <tr key={user.id} className="hover:bg-slate-50/30 transition-colors group">
                   <td className="py-4 px-8">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-500 font-bold shadow-inner">
+                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-500 font-bold shadow-inner group-hover:from-red-50 group-hover:to-red-100 group-hover:text-red-700 transition-all duration-300">
                          {user.full_name?.charAt(0) || '?'}
                       </div>
                       <div>
@@ -273,8 +305,8 @@ export default function UsuariosPage() {
                   <td className="py-4 px-8">
                     <div className="flex items-center gap-1 flex-wrap">
                        {Object.keys(user.permissions || {}).map(cat => (
-                         user.permissions[cat].length > 0 && (
-                           <span key={cat} className="text-[10px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                         user.permissions[cat]?.length > 0 && (
+                           <span key={cat} className="text-[10px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded uppercase tracking-tighter group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
                              {cat}
                            </span>
                          )
@@ -283,8 +315,18 @@ export default function UsuariosPage() {
                   </td>
                   <td className="py-4 px-8 text-right">
                      <div className="flex justify-end gap-1">
-                        <button className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all shadow-sm"><Edit3 className="w-4 h-4" /></button>
-                        <button className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all shadow-sm"><Trash2 className="w-4 h-4" /></button>
+                        <button 
+                          onClick={() => handleEdit(user)}
+                          className="p-2 text-slate-300 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all shadow-sm"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(user.id)}
+                          className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all shadow-sm"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                      </div>
                   </td>
                 </tr>

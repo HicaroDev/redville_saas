@@ -40,7 +40,7 @@ function PermissionBox({ label, category, modules, selectedPermissions, togglePe
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden transition-all hover:shadow-md">
        <div className="bg-slate-50/50 px-4 py-3 border-b border-slate-100 flex items-center gap-2">
           {categoryIcons[category]}
-          <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest">{label}</p>
+          <p className="text-[10px] font-semibold text-slate-800 uppercase tracking-widest">{label}</p>
        </div>
        <div className="p-3 space-y-1">
           {modules.map(m => {
@@ -52,7 +52,7 @@ function PermissionBox({ label, category, modules, selectedPermissions, togglePe
                     <div className={`p-1.5 rounded-lg transition-colors ${isChecked ? 'bg-red-50 text-red-700' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
                        <Icon className="w-3.5 h-3.5" />
                     </div>
-                    <span className={`text-[11px] font-bold transition-colors ${isChecked ? 'text-slate-900' : 'text-slate-500'}`}>{m}</span>
+                    <span className={`text-[11px] font-medium transition-colors ${isChecked ? 'text-slate-900 font-semibold' : 'text-slate-500'}`}>{m}</span>
                  </div>
                  <input 
                    type="checkbox"
@@ -176,13 +176,13 @@ export default function UsuariosPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Gestão de Equipe</h1>
+          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Gestão de Equipe</h1>
           <p className="text-sm text-slate-500 mt-1 font-medium italic opacity-70">Controle de acessos e segurança da plataforma</p>
         </div>
         {!showForm && (
           <button 
             onClick={() => { resetForm(); setShowForm(true); }} 
-            className="btn-primary-gradient px-6 py-3 flex items-center gap-2 shadow-lg shadow-red-100 font-bold rounded-2xl"
+            className="btn-primary-gradient px-6 py-2.5 flex items-center gap-2 shadow-lg shadow-red-100 font-semibold rounded-2xl"
           >
             <Plus className="w-4 h-4" /> Novo Membro
           </button>
@@ -195,7 +195,7 @@ export default function UsuariosPage() {
               <CheckCircle2 className="w-5 h-5" />
            </div>
            <div>
-              <p className="text-sm font-black text-emerald-900 uppercase tracking-tight">Base de Dados Atualizada!</p>
+              <p className="text-sm font-semibold text-emerald-900 uppercase tracking-tight">Base de Dados Atualizada!</p>
               <p className="text-xs text-emerald-600 font-medium">As novas chaves de acesso já estão ativas no sistema.</p>
            </div>
         </div>
@@ -210,10 +210,10 @@ export default function UsuariosPage() {
               {editingUserId ? <Edit3 className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
             </div>
             <div>
-               <h3 className="text-xl font-black text-slate-800 tracking-tight leading-none">
+               <h3 className="text-xl font-semibold text-slate-800 tracking-tight leading-none">
                  {editingUserId ? 'Editar Acesso do Membro' : 'Novo Membro na Equipe'}
                </h3>
-               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Configuração de Credenciais</p>
+               <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mt-1">Configuração de Credenciais</p>
             </div>
           </div>
 
@@ -221,24 +221,24 @@ export default function UsuariosPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Nome Completo</label>
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1">Nome Completo</label>
                   <input 
                     type="text" 
                     required
-                    className="form-input bg-slate-50/50 border-slate-100 focus:bg-white p-4 rounded-2xl font-bold" 
+                    className="form-input bg-slate-50/50 border-slate-100 focus:bg-white p-3.5 rounded-2xl font-medium" 
                     placeholder="Nome do usuário" 
                     value={formData.full_name}
                     onChange={(e) => setFormData({...formData, full_name: e.target.value})}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">E-mail Corporativo</label>
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1">E-mail Corporativo</label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                     <input 
                       type="email" 
                       required
-                      className="form-input bg-slate-50/50 border-slate-100 focus:bg-white pl-12 p-4 rounded-2xl font-bold" 
+                      className="form-input bg-slate-50/50 border-slate-100 focus:bg-white pl-12 p-3.5 rounded-2xl font-medium" 
                       placeholder="contato@redville.com.br" 
                       value={formData.email}
                       onChange={(e) => setFormData({...formData, email: e.target.value})}
@@ -246,7 +246,7 @@ export default function UsuariosPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 flex items-center justify-between">
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1 flex items-center justify-between">
                      <span>Senha de Acesso</span>
                      <button type="button" onClick={() => setShowPwd(!showPwd)} className="text-red-700 hover:opacity-70 transition-opacity">
                         {showPwd ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -256,7 +256,7 @@ export default function UsuariosPage() {
                     <input 
                       type={showPwd ? "text" : "password"} 
                       required
-                      className="form-input bg-slate-50/50 border-slate-100 focus:bg-white p-4 rounded-2xl font-bold tracking-widest" 
+                      className="form-input bg-slate-50/50 border-slate-100 focus:bg-white p-3.5 rounded-2xl font-medium tracking-widest" 
                       placeholder="Senha provisória" 
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
@@ -265,15 +265,15 @@ export default function UsuariosPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Nível de Hierarquia</label>
+                  <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-1">Nível de Hierarquia</label>
                   <select 
-                    className="form-input bg-slate-50/50 border-slate-100 focus:bg-white p-4 rounded-2xl font-black text-slate-800"
+                    className="form-input bg-slate-50/50 border-slate-100 focus:bg-white p-3.5 rounded-2xl font-semibold text-slate-800"
                     value={formData.role}
                     onChange={(e) => setFormData({...formData, role: e.target.value})}
                   >
-                    <option value="viewer">Visualizador (Apenas consulta)</option>
-                    <option value="manager">Gestor (Operacional)</option>
-                    <option value="admin">Administrador (Total)</option>
+                    <option value="viewer">Visualizador</option>
+                    <option value="manager">Gestor</option>
+                    <option value="admin">Administrador</option>
                   </select>
                 </div>
               </div>
@@ -281,11 +281,11 @@ export default function UsuariosPage() {
               <div className="lg:col-span-2 bg-slate-50/30 rounded-3xl p-8 border border-slate-100 ring-8 ring-slate-50/50">
                  <div className="flex items-center gap-2 mb-6">
                     <Layout className="w-4 h-4 text-slate-400" />
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Painel de Acessos Granulares</h4>
+                    <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Painel de Acessos Granulares</h4>
                  </div>
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <PermissionBox 
-                      label="Módulo Obras" 
+                      label="Obras" 
                       category="obras"
                       modules={DEFAULT_PERMISSIONS.obras} 
                       selectedPermissions={formData.permissions}
@@ -306,7 +306,7 @@ export default function UsuariosPage() {
                       togglePermission={togglePermission}
                     />
                  </div>
-                 <p className="text-[10px] text-slate-400 mt-6 italic font-medium">As permissões marcadas acima definem quais menus o usuário poderá visualizar no dashboard.</p>
+                 <p className="text-[10px] text-slate-400 mt-6 italic font-medium">Os acessos marcados definem quais menus o usuário poderá visualizar no dashboard.</p>
               </div>
             </div>
 
@@ -314,16 +314,16 @@ export default function UsuariosPage() {
               <button 
                 type="button" 
                 onClick={() => { setShowForm(false); resetForm(); }} 
-                className="px-8 py-3 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors"
+                className="px-8 py-3 text-sm font-semibold text-slate-400 hover:text-slate-600 transition-colors"
               >
                 Descartar
               </button>
               <button 
                 type="submit" 
                 disabled={saving}
-                className="btn-primary-gradient px-10 py-3 flex items-center gap-2 rounded-2xl shadow-xl shadow-red-100 font-bold"
+                className="btn-primary-gradient px-10 py-3 flex items-center gap-2 rounded-2xl shadow-xl shadow-red-100 font-semibold"
               >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : (editingUserId ? 'Confirmar Alterações' : 'Finalizar e Ativar Membro')}
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : (editingUserId ? 'Confirmar Edição' : 'Salvar e Ativar Membro')}
               </button>
             </div>
           </form>
@@ -334,16 +334,16 @@ export default function UsuariosPage() {
         {loading ? (
           <div className="p-32 flex flex-col items-center justify-center gap-4">
              <div className="w-16 h-16 border-4 border-red-700 border-t-transparent rounded-full animate-spin shadow-lg shadow-red-50"></div>
-             <p className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] mt-2">Sincronizando equipe...</p>
+             <p className="text-sm font-semibold text-slate-900 uppercase tracking-widest mt-2">Sincronizando equipe...</p>
           </div>
         ) : (
           <table className="w-full">
             <thead>
               <tr className="bg-slate-50/50">
-                <th className="text-left text-[11px] font-black text-slate-400 uppercase py-6 px-10 tracking-widest">Membro / E-mail</th>
-                <th className="text-left text-[11px] font-black text-slate-400 uppercase py-6 px-10 tracking-widest">Nível</th>
-                <th className="text-left text-[11px] font-black text-slate-400 uppercase py-6 px-10 tracking-widest">Painéis Ativos</th>
-                <th className="text-right text-[11px] font-black text-slate-400 uppercase py-6 px-10 tracking-widest">Gerenciar</th>
+                <th className="text-left text-[11px] font-semibold text-slate-400 uppercase py-6 px-10 tracking-widest">Membro / E-mail</th>
+                <th className="text-left text-[11px] font-semibold text-slate-400 uppercase py-6 px-10 tracking-widest">Nível</th>
+                <th className="text-left text-[11px] font-semibold text-slate-400 uppercase py-6 px-10 tracking-widest">Acessos</th>
+                <th className="text-right text-[11px] font-semibold text-slate-400 uppercase py-6 px-10 tracking-widest">Gerenciar</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -351,17 +351,17 @@ export default function UsuariosPage() {
                 <tr key={user.id} className="hover:bg-slate-50/50 transition-all group">
                   <td className="py-5 px-10">
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-500 font-bold shadow-inner group-hover:scale-110 group-hover:rotate-3 group-hover:from-red-600 group-hover:to-red-700 group-hover:text-white transition-all duration-500">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-500 font-semibold shadow-inner group-hover:from-red-600 group-hover:to-red-700 group-hover:text-white transition-all duration-500">
                          {user.full_name?.charAt(0) || '?'}
                       </div>
                       <div>
-                        <p className="text-base font-black text-slate-800 leading-tight">{user.full_name}</p>
-                        <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-wider">{user.email}</p>
+                        <p className="text-base font-semibold text-slate-800 leading-tight">{user.full_name}</p>
+                        <p className="text-[10px] text-slate-400 font-medium mt-1 uppercase tracking-wider">{user.email}</p>
                       </div>
                     </div>
                   </td>
                   <td className="py-5 px-10">
-                    <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm ${ROLES[user.role]?.color || 'bg-slate-50 text-slate-400'}`}>
+                    <span className={`px-3 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest shadow-sm ${ROLES[user.role]?.color || 'bg-slate-50 text-slate-400'}`}>
                       {ROLES[user.role]?.label || 'Visualizador'}
                     </span>
                   </td>
@@ -369,14 +369,11 @@ export default function UsuariosPage() {
                     <div className="flex items-center gap-1.5 flex-wrap">
                        {Object.keys(user.permissions || {}).map(cat => (
                          user.permissions[cat]?.length > 0 && (
-                           <span key={cat} className="text-[10px] font-black text-slate-400 bg-slate-100/50 px-2 py-1 rounded-lg uppercase tracking-tight group-hover:bg-white group-hover:text-red-700 group-hover:border group-hover:border-red-100 transition-all duration-300">
+                           <span key={cat} className="text-[10px] font-medium text-slate-400 bg-slate-100/50 px-2 py-1 rounded-lg uppercase tracking-tight group-hover:bg-white group-hover:text-red-700 group-hover:border group-hover:border-red-100 transition-all duration-300">
                              {cat}
                            </span>
                          )
                        ))}
-                       {(!user.permissions || Object.values(user.permissions).every(p => p.length === 0)) && (
-                         <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest italic opacity-50">Nenhum acesso</span>
-                       )}
                     </div>
                   </td>
                   <td className="py-5 px-10 text-right">
@@ -397,16 +394,6 @@ export default function UsuariosPage() {
                   </td>
                 </tr>
               ))}
-              {users.length === 0 && (
-                <tr>
-                  <td colSpan="4" className="py-32 text-center">
-                     <div className="flex flex-col items-center opacity-20">
-                        <Users className="w-12 h-12 text-slate-300 mb-2" />
-                        <p className="text-sm font-black text-slate-400 uppercase tracking-[0.2em] italic">Base de Equipe Vazia</p>
-                     </div>
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         )}

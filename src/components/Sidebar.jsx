@@ -75,6 +75,7 @@ export default function Sidebar({ activePage, onMenuChange }) {
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Operacional</p>
             </div>
             <SidebarItem icon={BarChart3} label="Dashboard" active={activePage === 'dashboard'} onClick={() => onMenuChange('dashboard')} />
+            <SidebarItem icon={Users} label="Clientes" active={activePage === 'clientes'} onClick={() => onMenuChange('clientes')} />
             <SidebarItem icon={Building2} label="Obras" active={activePage === 'obras'} onClick={() => onMenuChange('obras')} />
             <SidebarItem icon={Calendar} label="Cronograma" future />
             
@@ -116,7 +117,6 @@ export default function Sidebar({ activePage, onMenuChange }) {
                   <SidebarItem icon={Briefcase} label="Prestadores" isChild active={activePage === 'prestadores'} onClick={() => onMenuChange('prestadores')} />
                   <SidebarItem icon={User} label="Funcionários" isChild active={activePage === 'funcionarios'} onClick={() => onMenuChange('funcionarios')} />
                   <SidebarItem icon={FileText} label="Materiais" isChild active={activePage === 'materiais'} onClick={() => onMenuChange('materiais')} />
-                  <SidebarItem icon={Building2} label="Clientes" isChild active={activePage === 'clientes'} onClick={() => onMenuChange('clientes')} />
                 </div>
               )}
             </div>

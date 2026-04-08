@@ -13,6 +13,7 @@ import CadastroGeral from './pages/CadastroGeral';
 import SettingsPage from './pages/Settings';
 import LoginPage from './pages/Login';
 import UsuariosPage from './pages/Usuarios';
+import ClientesPage from './pages/Clientes';
 
 function App() {
   const [activeMenu, setActiveMenu] = useState('dashboard');
@@ -23,7 +24,6 @@ function App() {
 
   useEffect(() => {
     async function recoverSession() {
-      // 1. Check for custom Redville Session in LocalStorage (Bypass / DB Users)
       const savedSession = localStorage.getItem('redville_session');
       if (savedSession) {
         setSession(JSON.parse(savedSession));
@@ -31,7 +31,6 @@ function App() {
         return;
       }
 
-      // 2. Check current Supabase Auth session
       const { data: { session: authSession } } = await supabase.auth.getSession();
       if (authSession) {
         setSession(authSession);
@@ -41,7 +40,6 @@ function App() {
 
     recoverSession();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         setSession(session);
@@ -54,7 +52,6 @@ function App() {
   const handleLoginSuccess = (user) => {
     const newSession = { user };
     setSession(newSession);
-    // Save to LocalStorage to persist across F5
     localStorage.setItem('redville_session', JSON.stringify(newSession));
   };
 
@@ -83,6 +80,8 @@ function App() {
     switch (activeMenu) {
       case 'dashboard':
         return <DashboardPage />;
+      case 'clientes':
+        return <ClientesPage />;
       case 'obras':
         return <ObrasPage onOpenProject={handleOpenProject} />;
       case 'centros-custo':
@@ -102,7 +101,6 @@ function App() {
       case 'prestadores':
       case 'funcionarios':
       case 'materiais':
-      case 'clientes':
         const targetType = activeMenu === 'cadastros' ? 'fornecedores' : activeMenu;
         return <CadastroGeral type={targetType} />;
       case 'configuracoes':
@@ -132,6 +130,7 @@ function App() {
         <Topbar
           user={session.user}
           onLogout={handleLogout}
+          onOpenPage={setActiveMenu}
         />
         <main className="p-6 max-w-[1440px] mx-auto">
           {renderPage()}

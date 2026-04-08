@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from './lib/supabase';
 import Sidebar from './components/Sidebar';
 import Topbar from './components/Topbar';
 import DashboardPage from './pages/Dashboard';
@@ -10,11 +11,29 @@ import EvolucaoPage from './pages/Evolucao';
 import LancamentosPage from './pages/Lancamentos';
 import CadastroGeral from './pages/CadastroGeral';
 import SettingsPage from './pages/Settings';
+import LoginPage from './pages/Login';
 
 function App() {
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [selectedProject, setSelectedProject] = useState('all');
   const [openProjectCode, setOpenProjectCode] = useState(null);
+  const [session, setSession] = useState(null);
+  const [initializing, setInitializing] = useState(true);
+
+  useEffect(() => {
+    // Check current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setInitializing(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleOpenProject = (code) => {
     setOpenProjectCode(code);
@@ -52,23 +71,27 @@ function App() {
       case 'funcionarios':
       case 'materiais':
       case 'clientes':
-        // Se clicar no pai 'cadastros', abre fornecedores por padrão
         const targetType = activeMenu === 'cadastros' ? 'fornecedores' : activeMenu;
         return <CadastroGeral type={targetType} />;
       case 'configuracoes':
       case 'configurações':
         return <SettingsPage />;
       default:
-        return (
-          <div className="flex items-center justify-center h-96">
-            <div className="text-center">
-              <p className="text-lg font-semibold text-slate-700">Página em Construção</p>
-              <p className="text-sm text-slate-400 mt-1">A opção "{activeMenu}" está sendo preparada para você.</p>
-            </div>
-          </div>
-        );
+        return <DashboardPage />;
     }
   };
+
+  if (initializing) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-red-700 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <LoginPage onLoginSuccess={(user) => setSession({ user })} />;
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-50/30">
@@ -77,6 +100,7 @@ function App() {
         <Topbar
           selectedProject={selectedProject}
           onProjectChange={setSelectedProject}
+          user={session.user}
         />
         <main className="p-6 max-w-[1440px] mx-auto">
           {renderPage()}

@@ -49,16 +49,16 @@ export default function LoginPage({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-white overflow-hidden animate-in fade-in duration-500">
+    <div className="min-h-screen flex flex-col md:flex-row bg-white overflow-hidden animate-in fade-in duration-500 font-inter">
       {/* LEFT SIDE: THE IMAGE BOX */}
-      <div className="hidden lg:block lg:w-[45%] relative overflow-hidden">
+      <div className="hidden md:block md:w-[40%] lg:w-[45%] relative overflow-hidden bg-red-900">
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-[20s] hover:scale-110"
-          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1503387762-592dea58ef46?auto=format&fit=crop&q=80&w=1600")' }}
+          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1541888941259-7b9f92231e3b?auto=format&fit=crop&q=100&w=1600")' }}
         />
-        {/* RED OVERLAY SUTTLE */}
-        <div className="absolute inset-0 bg-red-900/10 mix-blend-multiply" />
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/10" />
+        {/* RED OVERLAY FOR BRAND CONSISTENCY */}
+        <div className="absolute inset-0 bg-red-950/20 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/20" />
       </div>
 
       {/* RIGHT SIDE: THE LOGIN CONTENT */}
@@ -70,7 +70,7 @@ export default function LoginPage({ onLoginSuccess }) {
             <img 
               src="/logo.png" 
               alt="Redville Obras" 
-              className="h-40 w-auto drop-shadow-xl animate-in slide-in-from-top-4 duration-700 font-inter" 
+              className="h-40 w-auto drop-shadow-xl animate-in slide-in-from-top-4 duration-700" 
             />
             <div className="h-1.5 w-12 bg-red-700 rounded-full mt-4 shadow-lg shadow-red-700/20" />
             <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-[0.4em] mt-3 opacity-80">Engenharia & Gestão Profissional</p>
@@ -120,14 +120,14 @@ export default function LoginPage({ onLoginSuccess }) {
               <button 
                 disabled={loading}
                 type="submit" 
-                className="w-full btn-primary-gradient py-4 flex items-center justify-center gap-3 group shadow-xl shadow-red-100 font-semibold"
+                className="w-full btn-primary-gradient py-4 flex items-center justify-center gap-3 group shadow-xl shadow-red-100"
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
-                    <span className="uppercase tracking-widest text-xs">Entrar no Painel</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    <span className="uppercase tracking-widest text-xs font-bold text-white">Entrar no Painel</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-white/90" />
                   </>
                 )}
               </button>

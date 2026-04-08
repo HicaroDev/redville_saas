@@ -12,6 +12,7 @@ import LancamentosPage from './pages/Lancamentos';
 import CadastroGeral from './pages/CadastroGeral';
 import SettingsPage from './pages/Settings';
 import LoginPage from './pages/Login';
+import UsuariosPage from './pages/Usuarios';
 
 function App() {
   const [activeMenu, setActiveMenu] = useState('dashboard');
@@ -63,6 +64,8 @@ function App() {
         return <LivroCaixaPage />;
       case 'lancamentos':
         return <LancamentosPage />;
+      case 'usuarios':
+        return <UsuariosPage />;
       case 'evolucao':
         return <EvolucaoPage />;
       case 'cadastros':
@@ -98,8 +101,6 @@ function App() {
       <Sidebar activePage={activeMenu} onMenuChange={(id) => { setActiveMenu(id); setOpenProjectCode(null); }} />
       <div className="flex-1 lg:ml-64 transition-all duration-300">
         <Topbar
-          selectedProject={selectedProject}
-          onProjectChange={setSelectedProject}
           user={session.user}
         />
         <main className="p-6 max-w-[1440px] mx-auto">

@@ -13,20 +13,9 @@ import {
   Truck,
   Briefcase,
   User,
-  FileText
+  FileText,
+  Users
 } from 'lucide-react';
-
-const MENU_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-  { id: 'obras', label: 'Obras', icon: Building2 },
-  { id: 'clientes', label: 'Clientes', icon: User, child: true, parent: 'cadastros' }, // For routing
-  { id: 'centros-custo', label: 'Centros de Custo', icon: Wallet },
-  { id: 'lancamentos', label: 'Lançamentos', icon: History },
-  { id: 'livro-caixa', label: 'Livro Caixa', icon: Calculator },
-  { id: 'evolução', label: 'Evolução', icon: BarChart3, future: true },
-  { id: 'cadastros', label: 'Cadastro Geral', icon: Settings },
-  { id: 'configurações', label: 'Configurações', icon: Settings },
-];
 
 export default function Sidebar({ activePage, onMenuChange }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -82,13 +71,14 @@ export default function Sidebar({ activePage, onMenuChange }) {
             <SidebarItem icon={Wallet} label="Centros de Custo" active={activePage === 'centros-custo'} onClick={() => onMenuChange('centros-custo')} />
             <SidebarItem icon={History} label="Lançamentos" active={activePage === 'lancamentos'} onClick={() => onMenuChange('lancamentos')} />
             <SidebarItem icon={Calculator} label="Livro Caixa" active={activePage === 'livro-caixa'} onClick={() => onMenuChange('livro-caixa')} />
+            <SidebarItem icon={Users} label="Gestão de Usuários" active={activePage === 'usuarios'} onClick={() => onMenuChange('usuarios')} />
             
             <div className="space-y-1">
               <button 
                 onClick={() => setShowCadastros(!showCadastros)}
                 className={`w-full flex items-center gap-3 px-5 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all`}
               >
-                <Settings className="w-5 h-5" />
+                <Settings className="w-4 h-4" />
                 {!collapsed && (
                   <>
                     <span>Cadastro Geral</span>

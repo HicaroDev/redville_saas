@@ -1,11 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Plus, UserCheck, Shield, Mail, Trash2, Edit3, Key, CheckSquare, Loader2, CheckCircle2, Lock, Eye, EyeOff } from 'lucide-react';
+import { 
+  Plus, UserCheck, Shield, Mail, Trash2, Edit3, Key, CheckSquare, Loader2, CheckCircle2, Lock, Eye, EyeOff,
+  Building2, Wallet, Settings, History, BookOpen, Users, Database, Layout, HardHat, FileText, Calculator
+} from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const ROLES = {
   admin: { label: 'Administrador', color: 'text-red-600 bg-red-50' },
   manager: { label: 'Gestor', color: 'text-blue-600 bg-blue-50' },
   viewer: { label: 'Visualizador', color: 'text-slate-600 bg-slate-50' }
+};
+
+const PERMISSION_METADATA = {
+  'Visualizar': { icon: Eye },
+  'Criar': { icon: Plus },
+  'Editar Orçamento': { icon: Calculator },
+  'Lançamentos': { icon: History },
+  'Livro Caixa': { icon: BookOpen },
+  'Pagamentos': { icon: Wallet },
+  'Usuários': { icon: Users },
+  'Cadastros': { icon: Database },
+  'Configurações': { icon: Settings }
 };
 
 const DEFAULT_PERMISSIONS = {
@@ -15,25 +30,39 @@ const DEFAULT_PERMISSIONS = {
 };
 
 function PermissionBox({ label, category, modules, selectedPermissions, togglePermission }) {
+  const categoryIcons = {
+    obras: <HardHat className="w-4 h-4 text-red-600" />,
+    financeiro: <Wallet className="w-4 h-4 text-blue-600" />,
+    config: <Settings className="w-4 h-4 text-slate-600" />
+  };
+
   return (
-    <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-       <p className="text-[10px] font-bold text-slate-800 uppercase mb-3 border-b border-slate-50 pb-2">{label}</p>
-       <div className="space-y-2">
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden transition-all hover:shadow-md">
+       <div className="bg-slate-50/50 px-4 py-3 border-b border-slate-100 flex items-center gap-2">
+          {categoryIcons[category]}
+          <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest">{label}</p>
+       </div>
+       <div className="p-3 space-y-1">
           {modules.map(m => {
             const isChecked = selectedPermissions[category]?.includes(m);
+            const Icon = PERMISSION_METADATA[m]?.icon || CheckSquare;
             return (
-              <label key={m} className="flex items-center gap-2 cursor-pointer group">
+              <label key={m} className="flex items-center justify-between p-2 rounded-xl cursor-pointer group hover:bg-slate-50 transition-all">
+                 <div className="flex items-center gap-2.5">
+                    <div className={`p-1.5 rounded-lg transition-colors ${isChecked ? 'bg-red-50 text-red-700' : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200'}`}>
+                       <Icon className="w-3.5 h-3.5" />
+                    </div>
+                    <span className={`text-[11px] font-bold transition-colors ${isChecked ? 'text-slate-900' : 'text-slate-500'}`}>{m}</span>
+                 </div>
                  <input 
                    type="checkbox"
                    className="hidden"
                    checked={isChecked}
                    onChange={() => togglePermission(category, m)}
                  />
-                 <div className={`w-4 h-4 rounded border transition-all flex items-center justify-center 
-                   ${isChecked ? 'bg-red-600 border-red-600 shadow-sm shadow-red-200' : 'border-slate-300 bg-white group-hover:border-red-400'}`}>
-                    {isChecked && <CheckSquare className="w-3 h-3 text-white" />}
+                 <div className={`w-8 h-4.5 rounded-full p-0.5 transition-all flex items-center ${isChecked ? 'bg-red-600 justify-end' : 'bg-slate-200 justify-start'}`}>
+                    <div className="w-3.5 h-3.5 bg-white rounded-full shadow-sm" />
                  </div>
-                 <span className={`text-xs transition-colors ${isChecked ? 'text-slate-900 font-bold' : 'text-slate-500 group-hover:text-slate-700'}`}>{m}</span>
               </label>
             );
           })}
@@ -147,105 +176,116 @@ export default function UsuariosPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Gestão de Usuários</h1>
-          <p className="text-sm text-slate-500 mt-1 font-medium">Níveis de acesso e senhas configuradas pelo administrador</p>
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Gestão de Equipe</h1>
+          <p className="text-sm text-slate-500 mt-1 font-medium italic opacity-70">Controle de acessos e segurança da plataforma</p>
         </div>
         {!showForm && (
           <button 
             onClick={() => { resetForm(); setShowForm(true); }} 
-            className="btn-primary-gradient flex items-center gap-2 shadow-lg shadow-red-100 font-bold"
+            className="btn-primary-gradient px-6 py-3 flex items-center gap-2 shadow-lg shadow-red-100 font-bold rounded-2xl"
           >
-            <Plus className="w-4 h-4" /> Novo Usuário
+            <Plus className="w-4 h-4" /> Novo Membro
           </button>
         )}
       </div>
 
       {successMsg && (
-        <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 shadow-sm">
-           <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-200">
+        <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-3xl flex items-center gap-4 animate-in fade-in slide-in-from-top-2 shadow-sm">
+           <div className="w-10 h-10 bg-emerald-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-200">
               <CheckCircle2 className="w-5 h-5" />
            </div>
            <div>
-              <p className="text-sm font-bold text-emerald-900">Configurações Salvas!</p>
-              <p className="text-xs text-emerald-600">O usuário já pode logar com estas credenciais.</p>
+              <p className="text-sm font-black text-emerald-900 uppercase tracking-tight">Base de Dados Atualizada!</p>
+              <p className="text-xs text-emerald-600 font-medium">As novas chaves de acesso já estão ativas no sistema.</p>
            </div>
         </div>
       )}
 
       {showForm && (
-        <div className="bg-white rounded-3xl p-8 shadow-xl border border-red-50 animate-in fade-in slide-in-from-top-4">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 bg-red-50 text-red-700 rounded-xl flex items-center justify-center shadow-sm">
-              <Lock className="w-5 h-5" />
+        <div className="bg-white rounded-[2.5rem] p-10 shadow-xl border border-red-50 animate-in fade-in slide-in-from-top-4 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-red-50 rounded-full -mr-32 -mt-32 opacity-20 blur-3xl pointer-events-none" />
+          
+          <div className="flex items-center gap-4 mb-10">
+            <div className="w-12 h-12 bg-red-700 text-white rounded-2xl flex items-center justify-center shadow-xl shadow-red-100 ring-4 ring-red-50">
+              {editingUserId ? <Edit3 className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
             </div>
-            <h3 className="text-lg font-bold text-slate-800 tracking-tight">
-              {editingUserId ? 'Editar Acesso do Usuário' : 'Configurar Novo Acesso'}
-            </h3>
+            <div>
+               <h3 className="text-xl font-black text-slate-800 tracking-tight leading-none">
+                 {editingUserId ? 'Editar Acesso do Membro' : 'Novo Membro na Equipe'}
+               </h3>
+               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Configuração de Credenciais</p>
+            </div>
           </div>
 
           <form onSubmit={handleSave}>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Nome Completo</label>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Nome Completo</label>
                   <input 
                     type="text" 
                     required
-                    className="form-input" 
+                    className="form-input bg-slate-50/50 border-slate-100 focus:bg-white p-4 rounded-2xl font-bold" 
                     placeholder="Nome do usuário" 
                     value={formData.full_name}
                     onChange={(e) => setFormData({...formData, full_name: e.target.value})}
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">E-mail Corporativo</label>
-                  <input 
-                    type="email" 
-                    required
-                    className="form-input" 
-                    placeholder="contato@redville.com.br" 
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  />
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">E-mail Corporativo</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                    <input 
+                      type="email" 
+                      required
+                      className="form-input bg-slate-50/50 border-slate-100 focus:bg-white pl-12 p-4 rounded-2xl font-bold" 
+                      placeholder="contato@redville.com.br" 
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 flex items-center justify-between">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 flex items-center justify-between">
                      <span>Senha de Acesso</span>
-                     <button type="button" onClick={() => setShowPwd(!showPwd)} className="text-red-600 hover:text-red-700 underline capitalize">
-                        {showPwd ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                     <button type="button" onClick={() => setShowPwd(!showPwd)} className="text-red-700 hover:opacity-70 transition-opacity">
+                        {showPwd ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                      </button>
                   </label>
                   <div className="relative">
                     <input 
                       type={showPwd ? "text" : "password"} 
                       required
-                      className="form-input pr-10" 
-                      placeholder="Defina a senha do funcionário" 
+                      className="form-input bg-slate-50/50 border-slate-100 focus:bg-white p-4 rounded-2xl font-bold tracking-widest" 
+                      placeholder="Senha provisória" 
                       value={formData.password}
                       onChange={(e) => setFormData({...formData, password: e.target.value})}
                     />
-                    <Key className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                    <Key className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Perfil de Acesso</label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Nível de Hierarquia</label>
                   <select 
-                    className="form-input font-bold"
+                    className="form-input bg-slate-50/50 border-slate-100 focus:bg-white p-4 rounded-2xl font-black text-slate-800"
                     value={formData.role}
                     onChange={(e) => setFormData({...formData, role: e.target.value})}
                   >
-                    <option value="viewer">Visualizador</option>
-                    <option value="manager">Gestor</option>
-                    <option value="admin">Administrador</option>
+                    <option value="viewer">Visualizador (Apenas consulta)</option>
+                    <option value="manager">Gestor (Operacional)</option>
+                    <option value="admin">Administrador (Total)</option>
                   </select>
                 </div>
               </div>
 
-              <div className="md:col-span-2 bg-slate-50/50 rounded-2xl p-6 border border-slate-100">
-                 <h4 className="text-[10px] font-bold text-slate-400 uppercase mb-4 tracking-widest">Acessos Granulares (Menu)</h4>
-                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-slate-600">
+              <div className="lg:col-span-2 bg-slate-50/30 rounded-3xl p-8 border border-slate-100 ring-8 ring-slate-50/50">
+                 <div className="flex items-center gap-2 mb-6">
+                    <Layout className="w-4 h-4 text-slate-400" />
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Painel de Acessos Granulares</h4>
+                 </div>
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <PermissionBox 
-                      label="Obras" 
+                      label="Módulo Obras" 
                       category="obras"
                       modules={DEFAULT_PERMISSIONS.obras} 
                       selectedPermissions={formData.permissions}
@@ -259,95 +299,99 @@ export default function UsuariosPage() {
                       togglePermission={togglePermission}
                     />
                     <PermissionBox 
-                      label="Config" 
+                      label="Configurações" 
                       category="config"
                       modules={DEFAULT_PERMISSIONS.config} 
                       selectedPermissions={formData.permissions}
                       togglePermission={togglePermission}
                     />
                  </div>
+                 <p className="text-[10px] text-slate-400 mt-6 italic font-medium">As permissões marcadas acima definem quais menus o usuário poderá visualizar no dashboard.</p>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-slate-100">
+            <div className="flex justify-end gap-3 mt-12 pt-8 border-t border-slate-100">
               <button 
                 type="button" 
                 onClick={() => { setShowForm(false); resetForm(); }} 
-                className="px-6 py-2 text-sm font-bold text-slate-400 hover:text-slate-600"
+                className="px-8 py-3 text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors"
               >
-                Cancelar
+                Descartar
               </button>
               <button 
                 type="submit" 
                 disabled={saving}
-                className="btn-primary-gradient px-8 flex items-center gap-2"
+                className="btn-primary-gradient px-10 py-3 flex items-center gap-2 rounded-2xl shadow-xl shadow-red-100 font-bold"
               >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : (editingUserId ? 'Atualizar Usuário' : 'Salvar e Ativar Acesso')}
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : (editingUserId ? 'Confirmar Alterações' : 'Finalizar e Ativar Membro')}
               </button>
             </div>
           </form>
         </div>
       )}
 
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
         {loading ? (
-          <div className="p-20 flex flex-col items-center justify-center gap-4">
-             <Loader2 className="w-10 h-10 text-red-700 animate-spin" />
-             <p className="text-sm font-medium text-slate-400 uppercase tracking-widest">Sincronizando equipe...</p>
+          <div className="p-32 flex flex-col items-center justify-center gap-4">
+             <div className="w-16 h-16 border-4 border-red-700 border-t-transparent rounded-full animate-spin shadow-lg shadow-red-50"></div>
+             <p className="text-sm font-black text-slate-900 uppercase tracking-[0.2em] mt-2">Sincronizando equipe...</p>
           </div>
         ) : (
           <table className="w-full">
             <thead>
               <tr className="bg-slate-50/50">
-                <th className="text-left text-[11px] font-bold text-slate-400 uppercase py-4 px-8 tracking-widest">Membro / E-mail</th>
-                <th className="text-left text-[11px] font-bold text-slate-400 uppercase py-4 px-8 tracking-widest">Perfil</th>
-                <th className="text-left text-[11px] font-bold text-slate-400 uppercase py-4 px-8 tracking-widest">Acessos</th>
-                <th className="text-right text-[11px] font-bold text-slate-400 uppercase py-4 px-8 tracking-widest">Ações</th>
+                <th className="text-left text-[11px] font-black text-slate-400 uppercase py-6 px-10 tracking-widest">Membro / E-mail</th>
+                <th className="text-left text-[11px] font-black text-slate-400 uppercase py-6 px-10 tracking-widest">Nível</th>
+                <th className="text-left text-[11px] font-black text-slate-400 uppercase py-6 px-10 tracking-widest">Painéis Ativos</th>
+                <th className="text-right text-[11px] font-black text-slate-400 uppercase py-6 px-10 tracking-widest">Gerenciar</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {users.map(user => (
-                <tr key={user.id} className="hover:bg-slate-50/30 transition-colors group">
-                  <td className="py-4 px-8">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-500 font-bold shadow-inner group-hover:from-red-50 group-hover:to-red-100 group-hover:text-red-700 transition-all duration-300">
+                <tr key={user.id} className="hover:bg-slate-50/50 transition-all group">
+                  <td className="py-5 px-10">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-500 font-bold shadow-inner group-hover:scale-110 group-hover:rotate-3 group-hover:from-red-600 group-hover:to-red-700 group-hover:text-white transition-all duration-500">
                          {user.full_name?.charAt(0) || '?'}
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-slate-800 leading-none">{user.full_name}</p>
-                        <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-tight">{user.email}</p>
+                        <p className="text-base font-black text-slate-800 leading-tight">{user.full_name}</p>
+                        <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-wider">{user.email}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="py-4 px-8">
-                    <span className={`px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${ROLES[user.role]?.color || 'bg-slate-50 text-slate-400'}`}>
+                  <td className="py-5 px-10">
+                    <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm ${ROLES[user.role]?.color || 'bg-slate-50 text-slate-400'}`}>
                       {ROLES[user.role]?.label || 'Visualizador'}
                     </span>
                   </td>
-                  <td className="py-4 px-8">
-                    <div className="flex items-center gap-1 flex-wrap">
+                  <td className="py-5 px-10">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                        {Object.keys(user.permissions || {}).map(cat => (
                          user.permissions[cat]?.length > 0 && (
-                           <span key={cat} className="text-[10px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded uppercase tracking-tighter group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
+                           <span key={cat} className="text-[10px] font-black text-slate-400 bg-slate-100/50 px-2 py-1 rounded-lg uppercase tracking-tight group-hover:bg-white group-hover:text-red-700 group-hover:border group-hover:border-red-100 transition-all duration-300">
                              {cat}
                            </span>
                          )
                        ))}
+                       {(!user.permissions || Object.values(user.permissions).every(p => p.length === 0)) && (
+                         <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest italic opacity-50">Nenhum acesso</span>
+                       )}
                     </div>
                   </td>
-                  <td className="py-4 px-8 text-right">
-                     <div className="flex justify-end gap-1">
+                  <td className="py-5 px-10 text-right">
+                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => handleEdit(user)}
-                          className="p-2 text-slate-300 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all shadow-sm"
+                          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-700 hover:bg-white hover:shadow-xl hover:shadow-red-700/5 rounded-2xl transition-all"
                         >
-                          <Edit3 className="w-4 h-4" />
+                          <Edit3 className="w-4.5 h-4.5" />
                         </button>
                         <button 
                           onClick={() => handleDelete(user.id)}
-                          className="p-2 text-slate-300 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all shadow-sm"
+                          className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-white hover:shadow-xl hover:shadow-red-700/5 rounded-2xl transition-all"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4.5 h-4.5" />
                         </button>
                      </div>
                   </td>
@@ -355,7 +399,12 @@ export default function UsuariosPage() {
               ))}
               {users.length === 0 && (
                 <tr>
-                  <td colSpan="4" className="py-20 text-center text-slate-300 text-sm font-bold uppercase tracking-widest italic opacity-50">Nenhum membro na base de dados</td>
+                  <td colSpan="4" className="py-32 text-center">
+                     <div className="flex flex-col items-center opacity-20">
+                        <Users className="w-12 h-12 text-slate-300 mb-2" />
+                        <p className="text-sm font-black text-slate-400 uppercase tracking-[0.2em] italic">Base de Equipe Vazia</p>
+                     </div>
+                  </td>
                 </tr>
               )}
             </tbody>

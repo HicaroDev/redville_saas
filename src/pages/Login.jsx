@@ -14,8 +14,8 @@ export default function LoginPage({ onLoginSuccess }) {
     setError(null);
 
     // MASTER BYPASS FOR INITIAL SETUP
-    if (email === 'Admin' && password === 'AdminMaster2026') {
-      onLoginSuccess({ email: 'admin@redville.com.br', user_metadata: { name: 'Admin Master' } });
+    if (email === 'admin@redville.com' && password === 'AdminMaster2026') {
+      onLoginSuccess({ email: 'admin@redville.com', user_metadata: { name: 'Admin Master' } });
       setLoading(false);
       return;
     }

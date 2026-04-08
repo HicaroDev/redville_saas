@@ -54,10 +54,12 @@ export default function LoginPage({ onLoginSuccess }) {
         {/* LOGO AREA */}
         <div className="text-center flex flex-col items-center mb-10">
           <img 
-            src="/logo.png" 
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZP25zdEQgwU0qE5AIrgvU8KN-EIyfaUF4tw&s" 
             alt="Redville Obras" 
-            className="h-32 w-auto animate-in zoom-in duration-700 drop-shadow-2xl" 
+            className="h-48 w-auto animate-in zoom-in duration-700 drop-shadow-2xl" 
           />
+          <div className="h-1 w-12 bg-red-700 rounded-full mt-6 opacity-80" />
+          <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-[0.3em] mt-3 opacity-80">Engenharia & Gestão Profissional</p>
         </div>
 
         {/* LOGIN CARD */}

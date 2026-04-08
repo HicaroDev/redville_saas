@@ -61,7 +61,7 @@ export default function Sidebar({ activePage, onMenuChange }) {
           <div className="p-6 flex items-center justify-between">
             {!collapsed && (
               <div className="flex items-center gap-2">
-                <img src="/logo.png" alt="Redville" className="h-10 w-auto" onError={(e) => e.target.style.display='none'} />
+                <img src="/logo.png" alt="Redville" className="h-15 w-auto" onError={(e) => e.target.style.display='none'} />
               </div>
             )}
             <button onClick={() => setCollapsed(!collapsed)} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400">

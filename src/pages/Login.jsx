@@ -54,7 +54,7 @@ export default function LoginPage({ onLoginSuccess }) {
       <div className="hidden lg:block lg:w-[45%] relative overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center transition-transform duration-[20s] hover:scale-110"
-          style={{ backgroundImage: 'url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZP25zdEQgwU0qE5AIrgvU8KN-EIyfaUF4tw&s")' }}
+          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1503387762-592dea58ef46?auto=format&fit=crop&q=80&w=1600")' }}
         />
         {/* RED OVERLAY SUTTLE */}
         <div className="absolute inset-0 bg-red-900/10 mix-blend-multiply" />

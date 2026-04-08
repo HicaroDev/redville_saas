@@ -49,17 +49,25 @@ export default function LoginPage({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 animate-in fade-in duration-500">
-      <div className="w-full max-w-[420px] space-y-8">
+    <div className="min-h-screen relative flex items-center justify-center p-4 animate-in fade-in duration-500 overflow-hidden">
+      {/* BACKGROUND WALLPAPER */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-[10s] hover:scale-110"
+        style={{ backgroundImage: 'url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZP25zdEQgwU0qE5AIrgvU8KN-EIyfaUF4tw&s")' }}
+      />
+      {/* OVERLAY */}
+      <div className="absolute inset-0 z-0 bg-slate-900/60 backdrop-blur-[2px]" />
+
+      <div className="w-full max-w-[420px] space-y-8 relative z-10 transition-all">
         {/* LOGO AREA */}
         <div className="text-center flex flex-col items-center mb-10">
           <img 
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZP25zdEQgwU0qE5AIrgvU8KN-EIyfaUF4tw&s" 
+            src="/logo.png" 
             alt="Redville Obras" 
-            className="h-48 w-auto animate-in zoom-in duration-700 drop-shadow-2xl" 
+            className="h-48 w-auto animate-in zoom-in duration-700 drop-shadow-[0_20px_20px_rgba(0,0,0,0.5)]" 
           />
-          <div className="h-1 w-12 bg-red-700 rounded-full mt-6 opacity-80" />
-          <p className="text-[11px] text-slate-400 font-semibold uppercase tracking-[0.3em] mt-3 opacity-80">Engenharia & Gestão Profissional</p>
+          <div className="h-1.5 w-16 bg-red-700 rounded-full mt-6 shadow-lg shadow-red-700/50" />
+          <p className="text-[12px] text-white font-semibold uppercase tracking-[0.4em] mt-4 opacity-90 drop-shadow-md">Engenharia & Gestão Profissional</p>
         </div>
 
         {/* LOGIN CARD */}

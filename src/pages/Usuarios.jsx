@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, UserCheck, Shield, Mail, Trash2, Edit3, Key, CheckSquare, Loader2, CheckCircle2 } from 'lucide-react';
+import { Plus, UserCheck, Shield, Mail, Trash2, Edit3, Key, CheckSquare, Loader2, CheckCircle2, Lock, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const ROLES = {
@@ -49,11 +49,13 @@ export default function UsuariosPage() {
   const [successMsg, setSuccessMsg] = useState(false);
   const [users, setUsers] = useState([]);
   const [editingUserId, setEditingUserId] = useState(null);
+  const [showPwd, setShowPwd] = useState(false);
   
   // Form State
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
+    password: '',
     role: 'viewer',
     permissions: {
       obras: ['Visualizar'],
@@ -97,6 +99,7 @@ export default function UsuariosPage() {
     setFormData({
       full_name: user.full_name,
       email: user.email,
+      password: user.password || '',
       role: user.role,
       permissions: user.permissions || { obras: ['Visualizar'], financeiro: [], config: [] }
     });
@@ -129,7 +132,7 @@ export default function UsuariosPage() {
   };
 
   const resetForm = () => {
-    setFormData({ full_name: '', email: '', role: 'viewer', permissions: { obras: ['Visualizar'], financeiro: [], config: [] } });
+    setFormData({ full_name: '', email: '', password: '', role: 'viewer', permissions: { obras: ['Visualizar'], financeiro: [], config: [] } });
     setEditingUserId(null);
   };
 
@@ -145,7 +148,7 @@ export default function UsuariosPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Gestão de Usuários</h1>
-          <p className="text-sm text-slate-500 mt-1 font-medium">Níveis de acesso e permissões granulares</p>
+          <p className="text-sm text-slate-500 mt-1 font-medium">Níveis de acesso e senhas configuradas pelo administrador</p>
         </div>
         {!showForm && (
           <button 
@@ -163,8 +166,8 @@ export default function UsuariosPage() {
               <CheckCircle2 className="w-5 h-5" />
            </div>
            <div>
-              <p className="text-sm font-bold text-emerald-900">Usuário {editingUserId ? 'Atualizado' : 'Criado'} com Sucesso!</p>
-              <p className="text-xs text-emerald-600">As configurações foram aplicadas à base de dados.</p>
+              <p className="text-sm font-bold text-emerald-900">Configurações Salvas!</p>
+              <p className="text-xs text-emerald-600">O usuário já pode logar com estas credenciais.</p>
            </div>
         </div>
       )}
@@ -173,10 +176,10 @@ export default function UsuariosPage() {
         <div className="bg-white rounded-3xl p-8 shadow-xl border border-red-50 animate-in fade-in slide-in-from-top-4">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 bg-red-50 text-red-700 rounded-xl flex items-center justify-center shadow-sm">
-              {editingUserId ? <Edit3 className="w-5 h-5" /> : <UserCheck className="w-5 h-5" />}
+              <Lock className="w-5 h-5" />
             </div>
             <h3 className="text-lg font-bold text-slate-800 tracking-tight">
-              {editingUserId ? 'Editar Permissões de Usuário' : 'Convidar Novo Usuário'}
+              {editingUserId ? 'Editar Acesso do Usuário' : 'Configurar Novo Acesso'}
             </h3>
           </div>
 
@@ -204,6 +207,25 @@ export default function UsuariosPage() {
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                   />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 flex items-center justify-between">
+                     <span>Senha de Acesso</span>
+                     <button type="button" onClick={() => setShowPwd(!showPwd)} className="text-red-600 hover:text-red-700 underline capitalize">
+                        {showPwd ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                     </button>
+                  </label>
+                  <div className="relative">
+                    <input 
+                      type={showPwd ? "text" : "password"} 
+                      required
+                      className="form-input pr-10" 
+                      placeholder="Defina a senha do funcionário" 
+                      value={formData.password}
+                      onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    />
+                    <Key className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                  </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Perfil de Acesso</label>

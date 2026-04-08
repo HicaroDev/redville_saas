@@ -20,7 +20,22 @@ export default function LoginPage({ onLoginSuccess }) {
       return;
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    // 2. CHECK DATABASE (ADMIN CREATED USERS)
+    const { data: dbUser, error: dbError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('email', email)
+      .eq('password', password)
+      .single();
+    
+    if (dbUser && !dbError) {
+      onLoginSuccess(dbUser);
+      setLoading(false);
+      return;
+    }
+
+    // 3. SUPABASE AUTH
+    const { data, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });

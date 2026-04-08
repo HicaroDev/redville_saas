@@ -14,7 +14,12 @@ import {
   Briefcase,
   User,
   FileText,
-  Users
+  Users,
+  Calendar,
+  Layers,
+  FileSearch,
+  PieChart,
+  Megaphone
 } from 'lucide-react';
 
 export default function Sidebar({ activePage, onMenuChange }) {
@@ -30,15 +35,15 @@ export default function Sidebar({ activePage, onMenuChange }) {
         ${active 
           ? 'text-red-800 bg-red-50 border-r-2 border-red-700' 
           : future 
-            ? 'text-gray-400 cursor-not-allowed' 
+            ? 'text-gray-300 cursor-not-allowed opacity-60' 
             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
         }
         ${isChild ? 'pl-12 text-xs' : ''}
       `}
     >
       <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-red-700' : ''}`} />
-      {!collapsed && <span>{label}</span>}
-      {future && !collapsed && <span className="ml-auto text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-400">Breve</span>}
+      {!collapsed && <span className="flex-1 text-left">{label}</span>}
+      {future && !collapsed && <span className="text-[9px] bg-slate-100 px-1.5 py-0.5 rounded-full text-slate-400 font-bold uppercase tracking-tighter">Em breve</span>}
     </button>
   );
 
@@ -65,22 +70,41 @@ export default function Sidebar({ activePage, onMenuChange }) {
             </button>
           </div>
 
-          <nav className="flex-1 overflow-y-auto py-4 space-y-1">
+          <nav className="flex-1 overflow-y-auto pt-2 pb-8 space-y-0.5">
+            <div className="px-5 py-2">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Operacional</p>
+            </div>
             <SidebarItem icon={BarChart3} label="Dashboard" active={activePage === 'dashboard'} onClick={() => onMenuChange('dashboard')} />
             <SidebarItem icon={Building2} label="Obras" active={activePage === 'obras'} onClick={() => onMenuChange('obras')} />
+            <SidebarItem icon={Calendar} label="Cronograma" future />
+            
+            <div className="px-5 py-4">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Financeiro</p>
+            </div>
             <SidebarItem icon={Wallet} label="Centros de Custo" active={activePage === 'centros-custo'} onClick={() => onMenuChange('centros-custo')} />
             <SidebarItem icon={History} label="Lançamentos" active={activePage === 'lancamentos'} onClick={() => onMenuChange('lancamentos')} />
             <SidebarItem icon={Calculator} label="Livro Caixa" active={activePage === 'livro-caixa'} onClick={() => onMenuChange('livro-caixa')} />
             
-            <div className="space-y-1">
+            <div className="px-5 py-4">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Gestão</p>
+            </div>
+            <SidebarItem icon={FileSearch} label="Documentos" future />
+            <SidebarItem icon={PieChart} label="Relatórios / BI" future />
+            <SidebarItem icon={Megaphone} label="CRM / Vendas" future />
+
+            <div className="px-5 py-4">
+               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Sistema</p>
+            </div>
+            
+            <div className="space-y-0.5">
               <button 
                 onClick={() => setShowCadastros(!showCadastros)}
                 className={`w-full flex items-center gap-3 px-5 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all`}
               >
-                <Settings className="w-4 h-4" />
+                <Layers className="w-4 h-4" />
                 {!collapsed && (
                   <>
-                    <span>Cadastro Geral</span>
+                    <span className="flex-1 text-left">Cadastro Geral</span>
                     <ChevronDown className={`ml-auto w-4 h-4 transition-transform ${showCadastros ? 'rotate-180' : ''}`} />
                   </>
                 )}

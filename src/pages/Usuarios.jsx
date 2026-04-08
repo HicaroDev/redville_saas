@@ -112,7 +112,7 @@ export default function UsuariosPage() {
       .upsert({
         ...(editingUserId ? { id: editingUserId } : {}),
         ...formData
-      });
+      }, { onConflict: 'email' });
 
     if (!error) {
       setSuccessMsg(true);

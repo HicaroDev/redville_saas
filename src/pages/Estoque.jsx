@@ -97,6 +97,8 @@ export default function EstoquePage() {
     item.projects?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const totalEstoqueValor = stock.reduce((acc, curr) => acc + (Number(curr.quantity) * 0), 0); // Placeholder para lógica de valor futuro
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-20">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -159,8 +161,8 @@ export default function EstoquePage() {
                <p className="text-[10px] text-slate-300 mt-2">Registre entradas de materiais para começar o controle.</p>
             </div>
           ) : filteredStock.map(item => (
-            <div key={item.id} className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 group hover:border-red-600/20 transition-all duration-300">
-               <div className="flex items-center justify-between mb-6">
+            <div key={item.id} className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 group hover:border-red-600/20 transition-all duration-300 flex flex-col">
+               <div className="flex items-start justify-between mb-6">
                   <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-red-700 group-hover:text-white transition-all duration-300 shadow-inner">
                      <Layers className="w-6 h-6" />
                   </div>
@@ -170,21 +172,31 @@ export default function EstoquePage() {
                   </div>
                </div>
                
-               <h3 className="text-lg font-bold text-slate-800 tracking-tight mb-1">{item.directory?.name}</h3>
-               <div className="flex items-center gap-2 mb-6">
-                  <Building2 className="w-3.5 h-3.5 text-red-600/40" />
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.projects?.name}</span>
+               <div className="flex-1">
+                 <h3 className="text-lg font-bold text-slate-800 tracking-tight mb-1">{item.directory?.name}</h3>
+                 <div className="flex items-center gap-2 mb-4">
+                    <Building2 className="w-3.5 h-3.5 text-red-600/40" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.projects?.name}</span>
+                 </div>
+                 
+                 {/* Metadata do Material */}
+                 <div className="bg-slate-50 rounded-2xl p-3 space-y-2 mb-6">
+                    <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-tight">
+                        <span className="text-slate-400">Última Ref.</span>
+                        <span className="text-slate-600 truncate max-w-[120px]">{item.unit || 'Entrada via Livro Caixa'}</span>
+                    </div>
+                 </div>
                </div>
 
                <div className="pt-6 border-t border-slate-50 flex items-end justify-between">
                   <div>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic">Quantidade em mãos</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic">Quantidade</p>
                     <p className="text-3xl font-black text-slate-900 tracking-tighter">
-                        {item.quantity} <span className="text-sm font-bold text-slate-300">{item.unit || 'un'}</span>
+                        {item.quantity} <span className="text-sm font-bold text-slate-300">un</span>
                     </p>
                   </div>
-                  {item.quantity <= 10 && (
-                      <div className="px-2 py-1 bg-amber-50 rounded-lg animate-pulse">
+                  {item.quantity <= 5 && (
+                      <div className="px-2 py-1 bg-amber-50 rounded-lg">
                          <span className="text-[9px] font-black text-amber-600 uppercase">Estoque Baixo</span>
                       </div>
                   )}

@@ -301,19 +301,35 @@ export default function EstoquePage() {
                 </div>
 
                 <div className="space-y-4">
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Material</label>
-                        <select 
-                            required 
-                            className="form-input" 
-                            value={formData.material_id} 
-                            onChange={e => setFormData({...formData, material_id: e.target.value})}
-                        >
-                            <option value="">Selecione o Material</option>
-                            {materials.map(m => (
-                                <option key={m.id} value={m.id}>{m.name}</option>
-                            ))}
-                        </select>
+                    <div className="space-y-1 relative">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Material (Busca no Cadastro Geral)</label>
+                        <div className="relative group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
+                            <input 
+                                type="text"
+                                placeholder="Digite para buscar material..."
+                                className="form-input pl-11 !bg-white focus:!border-red-600/30"
+                                value={materials.find(m => m.id === formData.material_id)?.name || ''}
+                                onChange={(e) => {
+                                    const term = e.target.value;
+                                    const match = materials.find(m => m.name.toLowerCase() === term.toLowerCase());
+                                    if (match) setFormData({...formData, material_id: match.id});
+                                    else setFormData({...formData, material_id: ''});
+                                }}
+                                list="materials-list"
+                            />
+                            <datalist id="materials-list">
+                                {materials.map(m => (
+                                    <option key={m.id} value={m.name}>{m.unit ? `(Unidade: ${m.unit})` : ''}</option>
+                                ))}
+                            </datalist>
+                        </div>
+                        {formData.material_id && (
+                            <div className="absolute right-3 top-9 flex items-center gap-1.5 px-2 py-1 bg-red-50 rounded-lg border border-red-100 animate-in fade-in zoom-in-95">
+                                <span className="text-[9px] font-bold text-red-700 uppercase">Selecionado</span>
+                            </div>
+                        )}
+                        <p className="text-[9px] text-slate-300 mt-1 px-1 italic">Dica: Se o material não aparecer, use o botão "Cadastrar Material" no topo da página.</p>
                     </div>
 
                     {/* VINCUL AR COMPRA - APENAS EM ENTRADA */}

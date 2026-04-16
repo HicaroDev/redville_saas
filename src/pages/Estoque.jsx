@@ -5,12 +5,13 @@ import { useStock, useStockMovements, createStockMovement, useDirectory, useProj
 export default function EstoquePage() {
   const [activeTab, setActiveTab] = useState('saldo'); // 'saldo' ou 'movimentacoes'
   const [showModal, setShowModal] = useState(false);
+  const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { stock, loading: loadingStock, refetch: refetchStock } = useStock();
   const { movements, loading: loadingMovements, refetch: refetchMovements } = useStockMovements();
-  const { items: materials } = useDirectory('material');
+  const { items: materials, refetch: refetchMaterials } = useDirectory('material');
   const { projects } = useProjects();
 
   const [formData, setFormData] = useState({
@@ -22,6 +23,26 @@ export default function EstoquePage() {
     description: '',
     entry_date: new Date().toISOString().split('T')[0]
   });
+
+  const [materialForm, setMaterialForm] = useState({
+    name: '',
+    document: '',
+    category: 'material'
+  });
+
+  const handleSaveMaterial = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    const { error } = await createDirectoryItem(materialForm);
+    if (!error) {
+       setShowMaterialModal(false);
+       setMaterialForm({ name: '', document: '', category: 'material' });
+       refetchMaterials();
+    } else {
+       alert('Erro ao cadastrar material: ' + error.message);
+    }
+    setIsSubmitting(false);
+  };
 
   const handleSaveMovement = async (e) => {
     e.preventDefault();
@@ -81,6 +102,9 @@ export default function EstoquePage() {
                 className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'movimentacoes' ? 'bg-red-700 text-white shadow-lg shadow-red-700/20' : 'bg-white text-slate-400 hover:text-slate-600 border border-slate-100'}`}
             >
                 Movimentações
+            </button>
+            <button onClick={() => setShowMaterialModal(true)} className="ml-2 bg-white text-slate-700 border border-slate-100 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm">
+               <Layers className="w-4 h-4 text-red-700" /> Cadastrar Material
             </button>
             <button onClick={() => setShowModal(true)} className="ml-2 btn-primary-gradient flex items-center gap-2">
                <Plus className="w-4 h-4" /> Nova Movimentação
@@ -346,6 +370,70 @@ export default function EstoquePage() {
                     >
                         {isSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
                         Confirmar Movimentação
+                    </button>
+                </div>
+             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL CADASTRAR MATERIAL */}
+      {showMaterialModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg my-8 overflow-hidden animate-in zoom-in-95 duration-200">
+             <div className="px-10 py-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-red-700">
+                      <Layers className="w-6 h-6" />
+                   </div>
+                   <div>
+                      <h3 className="text-xl font-bold text-slate-800 tracking-tight">Cadastrar Novo Material</h3>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 italic text-left">Base de Dados Geral</p>
+                   </div>
+                </div>
+                <button onClick={() => setShowMaterialModal(false)} className="w-10 h-10 hover:bg-white hover:shadow-md rounded-2xl transition-all flex items-center justify-center"><X className="w-5 h-5 text-slate-400" /></button>
+             </div>
+
+             <form onSubmit={handleSaveMaterial} className="p-10 space-y-6">
+                <div className="space-y-4">
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Nome do Material / Insumo</label>
+                        <input 
+                            type="text" 
+                            required 
+                            placeholder="Ex: Cimento CP-II, Tijolo 8 Furos, Areia..." 
+                            className="form-input" 
+                            value={materialForm.name} 
+                            onChange={e => setMaterialForm({...materialForm, name: e.target.value})} 
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Código / Referência (Opcional)</label>
+                        <input 
+                            type="text" 
+                            placeholder="Ex: MAT-001" 
+                            className="form-input font-medium" 
+                            value={materialForm.document} 
+                            onChange={e => setMaterialForm({...materialForm, document: e.target.value})} 
+                        />
+                    </div>
+                </div>
+
+                <div className="flex gap-4 pt-6">
+                    <button 
+                        type="button" 
+                        onClick={() => setShowMaterialModal(false)}
+                        className="flex-1 py-4 font-bold text-slate-400 text-[10px] uppercase tracking-widest"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="submit" 
+                        disabled={isSubmitting}
+                        className="flex-1 bg-slate-900 text-white rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] shadow-xl hover:bg-red-700 transition-all flex items-center justify-center gap-2"
+                    >
+                        {isSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+                        Salvar Material
                     </button>
                 </div>
              </form>

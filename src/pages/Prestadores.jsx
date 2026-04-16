@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { 
   Plus, X, Phone, Mail, FileText, Search, User, Briefcase, Save, Trash2, 
   ChevronRight, Calendar, DollarSign, Users, ExternalLink, Activity,
-  ArrowRight, CheckCircle2, AlertCircle, Loader2
+  ArrowRight, CheckCircle2, AlertCircle, Loader2, Pencil
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useProjects } from '../hooks/useData';

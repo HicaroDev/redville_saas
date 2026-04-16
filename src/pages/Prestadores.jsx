@@ -19,7 +19,12 @@ export default function PrestadoresPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [expandedHistory, setExpandedHistory] = useState({});
   const { projects } = useProjects();
+
+  const toggleHistory = (id) => {
+    setExpandedHistory(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const [formData, setFormData] = useState({
     name: '',
@@ -58,25 +63,32 @@ export default function PrestadoresPage() {
       // Get all cashbook payments linked to providers
       const { data: payments } = await supabase
         .from('cashbook_entries')
-        .select('provider_id, contract_id, expense_amount');
+        .select('*, projects(code, name)')
+        .not('provider_id', 'is', null) // Only payments to providers
+        .order('entry_date', { ascending: false });
       
       const paymentsMap = (payments || []).reduce((acc, p) => {
+        // Group totals
         if (p.provider_id) {
-          acc.providers[p.provider_id] = (acc.providers[p.provider_id] || 0) + Number(p.expense_amount);
+          acc.totals.providers[p.provider_id] = (acc.totals.providers[p.provider_id] || 0) + Number(p.expense_amount);
+          // Store history
+          if (!acc.history[p.provider_id]) acc.history[p.provider_id] = [];
+          acc.history[p.provider_id].push(p);
         }
         if (p.contract_id) {
-          acc.contracts[p.contract_id] = (acc.contracts[p.contract_id] || 0) + Number(p.expense_amount);
+          acc.totals.contracts[p.contract_id] = (acc.totals.contracts[p.contract_id] || 0) + Number(p.expense_amount);
         }
         return acc;
-      }, { providers: {}, contracts: {} });
+      }, { totals: { providers: {}, contracts: {} }, history: {} });
 
       setProviders(providersData.map(p => ({
         ...p,
-        total_received: paymentsMap.providers[p.id] || 0,
+        total_received: paymentsMap.totals.providers[p.id] || 0,
+        payments_history: paymentsMap.history[p.id] || [],
         service_contracts: (p.service_contracts || []).map(c => ({
           ...c,
-          total_paid: paymentsMap.contracts[c.id] || 0,
-          balance: Number(c.total_agreed_value) - (paymentsMap.contracts[c.id] || 0)
+          total_paid: paymentsMap.totals.contracts[c.id] || 0,
+          balance: Number(c.total_agreed_value) - (paymentsMap.totals.contracts[c.id] || 0)
         }))
       })));
     }
@@ -235,7 +247,7 @@ export default function PrestadoresPage() {
                    <h4 className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] italic">Dossiê de Contratos</h4>
                    <button 
                     onClick={() => {
-                        setContractData({...contractData, provider_id: p.id});
+                        setContractData({ id: null, provider_id: p.id, project_id: '', service_type: 'Empreita', description: '', total_agreed_value: '', start_date: new Date().toISOString().split('T')[0], status: 'ativo', contract_url: '' });
                         setShowContractModal(true);
                     }}
                     className="flex items-center gap-1.5 text-[10px] text-red-700 font-bold uppercase hover:bg-red-50 px-3 py-1.5 rounded-lg transition-all"
@@ -301,21 +313,72 @@ export default function PrestadoresPage() {
                          <div className="pt-3 border-t border-slate-50 flex items-center justify-between">
                             <div className="flex-1">
                                <div className="flex items-center justify-between mb-1.5">
-                                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Saldo do Contrato</span>
-                                  <span className="text-[9px] font-bold text-slate-800">{Math.round((c.total_paid / c.total_agreed_value) * 100)}% pago</span>
+                                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Total Pago</span>
+                                  {c.service_type === 'Empreita' && (
+                                     <span className="text-[9px] font-bold text-slate-800">{Math.round((c.total_paid / c.total_agreed_value) * 100)}% concluído</span>
+                                  )}
                                </div>
-                               <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex">
-                                  <div className={`h-full rounded-full transition-all duration-1000 ${c.status === 'cancelado' ? 'bg-slate-300' : 'bg-emerald-500'}`} style={{ width: `${Math.min(100, (c.total_paid / c.total_agreed_value) * 100)}%` }} />
-                               </div>
+                               {c.service_type === 'Empreita' ? (
+                                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden flex">
+                                     <div className={`h-full rounded-full transition-all duration-1000 ${c.status === 'cancelado' ? 'bg-slate-300' : 'bg-emerald-500'}`} style={{ width: `${Math.min(100, (c.total_paid / c.total_agreed_value) * 100)}%` }} />
+                                  </div>
+                               ) : (
+                                  <p className="text-sm font-bold text-emerald-600">{formatCurrency(c.total_paid)}</p>
+                               )}
                             </div>
                             <div className="pl-6 text-right">
                                <p className={`text-[11px] font-bold ${c.balance > 0 ? 'text-red-600' : 'text-emerald-600'}`}>{formatCurrency(c.balance)}</p>
-                               <p className="text-[8px] font-bold text-slate-300 uppercase">Restante</p>
+                               <p className="text-[8px] font-bold text-slate-300 uppercase">A Pagar</p>
                             </div>
                          </div>
                       </div>
                     ))}
                   </div>
+                )}
+             </div>
+
+             {/* Payment History Section */}
+             <div className="mt-8 border-t border-slate-50 pt-6">
+                <button 
+                  onClick={() => toggleHistory(p.id)}
+                  className="flex items-center justify-between w-full group/hist transition-all"
+                >
+                   <h4 className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] italic flex items-center gap-2">
+                       <History className="w-3.5 h-3.5" /> Histórico Financeiro
+                   </h4>
+                   <ChevronRight className={`w-4 h-4 text-slate-300 transition-transform ${expandedHistory[p.id] ? 'rotate-90 text-red-700' : ''}`} />
+                </button>
+
+                {expandedHistory[p.id] && (
+                   <div className="mt-4 space-y-2 animate-in slide-in-from-top-2 duration-200">
+                      {p.payments_history?.length === 0 ? (
+                         <p className="text-[10px] text-slate-400 italic py-2">Sem histórico de pagamentos.</p>
+                      ) : (
+                         <div className="bg-slate-50/50 rounded-2xl overflow-hidden border border-slate-100">
+                            <table className="w-full text-[10px]">
+                               <thead className="bg-slate-100/50 text-slate-400 uppercase font-black tracking-tighter">
+                                  <tr>
+                                     <th className="py-2 px-3 text-left">Data</th>
+                                     <th className="py-2 px-3 text-left">Referência / Obra</th>
+                                     <th className="py-2 px-3 text-right">Valor</th>
+                                  </tr>
+                               </thead>
+                               <tbody className="divide-y divide-slate-100">
+                                  {p.payments_history.map(pay => (
+                                     <tr key={pay.id} className="hover:bg-white transition-colors">
+                                        <td className="py-2.5 px-3 font-medium text-slate-500">{new Date(pay.entry_date).toLocaleDateString()}</td>
+                                        <td className="py-2.5 px-3">
+                                           <p className="font-bold text-slate-700 truncate max-w-[120px]">{pay.description}</p>
+                                           <p className="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">{pay.projects?.code}</p>
+                                        </td>
+                                        <td className="py-2.5 px-3 text-right font-black text-red-600">{formatCurrency(pay.expense_amount)}</td>
+                                     </tr>
+                                  ))}
+                               </tbody>
+                            </table>
+                         </div>
+                      )}
+                   </div>
                 )}
              </div>
 

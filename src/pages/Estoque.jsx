@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Package, Plus, Search, History, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Building2, Filter, Save, X, Layers } from 'lucide-react';
-import { useStock, useStockMovements, createStockMovement, useDirectory, useProjects } from '../hooks/useData';
+import { Package, Plus, Search, History, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Building2, Filter, Save, X, Layers, Pencil, Trash2, Link as LinkIcon, DollarSign as DollarIcon } from 'lucide-react';
+import { useStock, useStockMovements, createStockMovement, useDirectory, useProjects, updateDirectoryItem, deleteDirectoryItem, useCashbook } from '../hooks/useData';
 
 export default function EstoquePage() {
   const [activeTab, setActiveTab] = useState('saldo'); // 'saldo' ou 'movimentacoes'
@@ -12,6 +12,7 @@ export default function EstoquePage() {
   const { stock, loading: loadingStock, refetch: refetchStock } = useStock();
   const { movements, loading: loadingMovements, refetch: refetchMovements } = useStockMovements();
   const { items: materials, refetch: refetchMaterials } = useDirectory('material');
+  const { entries: purchases } = useCashbook('all'); // Puxa compras para vínculo
   const { projects } = useProjects();
 
   const [formData, setFormData] = useState({
@@ -21,7 +22,8 @@ export default function EstoquePage() {
     quantity: '',
     type: 'entrada',
     description: '',
-    entry_date: new Date().toISOString().split('T')[0]
+    entry_date: new Date().toISOString().split('T')[0],
+    cashbook_entry_id: ''
   });
 
   const [materialForm, setMaterialForm] = useState({
@@ -44,6 +46,22 @@ export default function EstoquePage() {
     setIsSubmitting(false);
   };
 
+  const handleEditMaterial = (item) => {
+      setMaterialForm({ ...item });
+      setShowMaterialModal(true);
+  };
+
+  const handleDeleteMaterial = async (id) => {
+      if (!confirm('Excluir este item de estoque permanentemente?')) return;
+      const { error } = await deleteDirectoryItem(id);
+      if (!error) {
+          refetchStock();
+          refetchMaterials();
+      } else {
+          alert('Erro ao excluir: ' + error.message);
+      }
+  };
+
   const handleSaveMovement = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -51,6 +69,7 @@ export default function EstoquePage() {
     const data = { ...formData };
     if (data.type === 'entrada') data.from_project_id = null;
     if (data.type === 'saída') data.to_project_id = null;
+    if (data.cashbook_entry_id === '') data.cashbook_entry_id = null;
     
     const { error } = await createStockMovement(data);
     
@@ -145,8 +164,9 @@ export default function EstoquePage() {
                   <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-red-700 group-hover:text-white transition-all duration-300 shadow-inner">
                      <Layers className="w-6 h-6" />
                   </div>
-                  <div className="px-3 py-1 bg-slate-50 rounded-lg text-slate-400 text-[10px] font-bold uppercase">
-                     {item.unit || 'un'}
+                  <div className="flex gap-1">
+                      <button onClick={() => handleEditMaterial(item.directory)} className="p-2 text-slate-100 hover:text-amber-500 transition-colors"><Pencil className="w-4 h-4" /></button>
+                      <button onClick={() => handleDeleteMaterial(item.material_id)} className="p-2 text-slate-100 hover:text-red-700 transition-colors"><Trash2 className="w-4 h-4" /></button>
                   </div>
                </div>
                
@@ -283,6 +303,35 @@ export default function EstoquePage() {
                             ))}
                         </select>
                     </div>
+
+                    {/* VINCUL AR COMPRA - APENAS EM ENTRADA */}
+                    {formData.type === 'entrada' && (
+                        <div className="space-y-1 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
+                            <label className="flex items-center gap-2 text-[10px] font-bold text-emerald-700 uppercase tracking-widest px-1 mb-2">
+                                <LinkIcon className="w-3 h-3" /> Vincular à uma Compra (Financeiro)
+                            </label>
+                            <select 
+                                className="form-input bg-white border-emerald-100" 
+                                value={formData.cashbook_entry_id} 
+                                onChange={e => {
+                                    const purchase = purchases.find(p => p.id === e.target.value);
+                                    setFormData({
+                                        ...formData, 
+                                        cashbook_entry_id: e.target.value,
+                                        description: purchase ? `Referente a: ${purchase.description} (${purchase.payee_name})` : formData.description
+                                    });
+                                }}
+                            >
+                                <option value="">Nenhuma compra vinculada (Opcional)</option>
+                                {purchases.filter(p => p.category === 'despesa').slice(0, 30).map(p => (
+                                    <option key={p.id} value={p.id}>
+                                        {new Date(p.date).toLocaleDateString()} - {p.payee_name}: R$ {p.total_out} ({p.description})
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="text-[9px] text-emerald-600 mt-2 px-1">Selecione para puxar automaticamente o custo e fornecedor do Livro Caixa.</p>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">

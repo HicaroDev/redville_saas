@@ -19,7 +19,6 @@ import {
   Layers,
   FileSearch,
   PieChart,
-  PieChart,
   Megaphone,
   Package
 } from 'lucide-react';

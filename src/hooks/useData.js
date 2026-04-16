@@ -33,6 +33,10 @@ export function useProjects() {
   return { projects, loading, refetch: fetchProjects };
 }
 
+export async function deleteProject(id) {
+  return await supabase.from('projects').delete().eq('id', id);
+}
+
 // ========== ETAPAS ==========
 export function useStages(projectCode) {
   const [stages, setStages] = useState([]);
@@ -347,6 +351,10 @@ export async function createWallet(walletData) {
   return await supabase.from('wallets').insert(walletData).select().single();
 }
 
+export async function updateWallet(id, updates) {
+  return await supabase.from('wallets').update(updates).eq('id', id).select().single();
+}
+
 // ========== DIRETÓRIO (CADASTRO GERAL) ==========
 export function useDirectory(category) {
   const [items, setItems] = useState([]);
@@ -368,4 +376,31 @@ export function useDirectory(category) {
 
 export async function createDirectoryItem(itemData) {
   return await supabase.from('directory').insert(itemData).select().single();
+}
+
+// ========== PRESTADORES DE SERVIÇO ==========
+export function useServiceProviders() {
+  const [providers, setProviders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProviders = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('service_providers')
+      .select('*, service_contracts(*, projects(name, code))')
+      .order('name');
+    
+    if (!error && data) {
+      setProviders(data);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchProviders(); }, [fetchProviders]);
+
+  return { providers, loading, refetch: fetchProviders };
+}
+
+export async function updateServiceContract(id, updates) {
+  return await supabase.from('service_contracts').update(updates).eq('id', id).select().single();
 }

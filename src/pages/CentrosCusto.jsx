@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Wallet, ArrowUpRight, ArrowDownLeft, RefreshCcw, Landmark, User, History, Plus, X, Save } from 'lucide-react';
-import { useWallets, createWallet, useCashbook } from '../hooks/useData';
+import { Wallet, ArrowUpRight, ArrowDownLeft, RefreshCcw, Landmark, User, History, Plus, X, Save, Edit3 } from 'lucide-react';
+import { useWallets, createWallet, updateWallet, useCashbook } from '../hooks/useData';
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
@@ -9,8 +9,10 @@ function formatCurrency(value) {
 export default function CentrosCustoPage() {
   const { wallets, loading: loadingW, refetch } = useWallets();
   const { entries } = useCashbook('all');
-  const [showCreate, setShowCreate] = useState(false);
-  const [newWallet, setNewWallet] = useState({ name: '', type: 'outros' });
+  const [showForm, setShowForm] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [formData, setFormData] = useState({ name: '', type: 'outros' });
   const [isSaving, setIsSaving] = useState(false);
 
   if (loadingW) {
@@ -23,16 +25,34 @@ export default function CentrosCustoPage() {
       .reduce((acc, current) => acc + (Number(current.income_amount) || 0) - (Number(current.expense_amount) || 0), 0);
   };
 
-  const handleCreate = async (e) => {
+  const handleOpenEdit = (wallet) => {
+    setEditingId(wallet.id);
+    setFormData({ name: wallet.name, type: wallet.type });
+    setIsEditing(true);
+    setShowForm(true);
+  };
+
+  const handleOpenCreate = () => {
+    setEditingId(null);
+    setFormData({ name: '', type: 'outros' });
+    setIsEditing(false);
+    setShowForm(true);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSaving(true);
-    const { error } = await createWallet(newWallet);
+    
+    const { error } = isEditing 
+      ? await updateWallet(editingId, formData)
+      : await createWallet(formData);
+
     if (!error) {
-       setShowCreate(false);
-       setNewWallet({ name: '', type: 'outros' });
+       setShowForm(false);
+       setFormData({ name: '', type: 'outros' });
        refetch();
     } else {
-       alert('Erro ao criar carteira: ' + error.message);
+       alert('Erro ao salvar centro de custo: ' + error.message);
     }
     setIsSaving(false);
   };
@@ -41,21 +61,21 @@ export default function CentrosCustoPage() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="rv-header">Carteiras Financeiras</h1>
+          <h1 className="rv-header">Centros de Custo</h1>
           <p className="text-sm text-slate-500 font-medium italic mt-1">Gestão de fluxos entre Obra, Sócios e Construtora</p>
         </div>
         <button 
-           onClick={() => setShowCreate(true)}
+           onClick={handleOpenCreate}
            className="btn-primary-gradient flex items-center gap-2"
         >
-          <Plus className="w-4 h-4" /> Nova Carteira
+          <Plus className="w-4 h-4" /> Novo Centro
         </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {wallets.length === 0 && (
            <div className="col-span-3 py-16 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-center">
-              <p className="rv-label uppercase tracking-widest italic opacity-40">Nenhuma carteira cadastrada</p>
+              <p className="rv-label uppercase tracking-widest italic opacity-40">Nenhum centro de custo cadastrado</p>
            </div>
         )}
         {wallets.map((w) => {
@@ -67,7 +87,15 @@ export default function CentrosCustoPage() {
                   <div className={`p-2 rounded-lg bg-slate-100 text-slate-500 group-hover:bg-red-700 group-hover:text-white transition-colors`}>
                     <Landmark className="w-5 h-5" />
                   </div>
-                  <span className="rv-label text-[9px]">{w.type}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="rv-label text-[9px]">{w.type}</span>
+                    <button 
+                      onClick={() => handleOpenEdit(w)}
+                      className="p-1.5 opacity-0 group-hover:opacity-100 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-red-700 transition-all"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                </div>
                <div>
                   <p className="text-sm font-medium text-slate-600">{w.name}</p>
@@ -87,31 +115,31 @@ export default function CentrosCustoPage() {
         })}
       </div>
 
-      {showCreate && (
+      {showForm && (
          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-slate-800">Nova Carteira</h3>
-                  <button onClick={() => setShowCreate(false)} className="p-2 hover:bg-slate-50 rounded-full"><X className="w-5 h-5 text-slate-400" /></button>
+                  <h3 className="text-lg font-bold text-slate-800">{isEditing ? 'Editar Centro de Custo' : 'Novo Centro de Custo'}</h3>
+                  <button onClick={() => setShowForm(false)} className="p-2 hover:bg-slate-50 rounded-full"><X className="w-5 h-5 text-slate-400" /></button>
                </div>
-               <form onSubmit={handleCreate} className="p-6 space-y-4">
+               <form onSubmit={handleSubmit} className="p-6 space-y-4">
                   <div className="space-y-1">
-                     <label className="rv-label px-1">Nome da Carteira</label>
+                     <label className="rv-label px-1">Nome</label>
                      <input 
                         type="text" 
                         required 
                         className="form-input" 
-                        placeholder="Ex: Carteira do Dono" 
-                        value={newWallet.name}
-                        onChange={e => setNewWallet({...newWallet, name: e.target.value})}
+                        placeholder="Ex: Administração Central" 
+                        value={formData.name}
+                        onChange={e => setFormData({...formData, name: e.target.value})}
                      />
                   </div>
                   <div className="space-y-1">
                      <label className="rv-label px-1">Categoria</label>
                      <select 
                         className="form-input"
-                        value={newWallet.type}
-                        onChange={e => setNewWallet({...newWallet, type: e.target.value})}
+                        value={formData.type}
+                        onChange={e => setFormData({...formData, type: e.target.value})}
                      >
                         <option value="dono">Dono / Sócio</option>
                         <option value="empresa">Empresa / Sede</option>
@@ -120,10 +148,10 @@ export default function CentrosCustoPage() {
                      </select>
                   </div>
                   <div className="flex gap-4 pt-4 border-t border-slate-50">
-                     <button type="button" onClick={() => setShowCreate(false)} className="flex-1 py-3 font-semibold text-slate-400 text-sm">Cancelar</button>
+                     <button type="button" onClick={() => setShowForm(false)} className="flex-1 py-3 font-semibold text-slate-400 text-sm">Cancelar</button>
                      <button type="submit" disabled={isSaving} className="flex-1 btn-primary-gradient flex items-center justify-center gap-2">
                         {isSaving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
-                        Criar Carteira
+                        {isEditing ? 'Salvar Edição' : 'Criar Centro'}
                      </button>
                   </div>
                </form>

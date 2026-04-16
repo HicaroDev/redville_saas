@@ -1,23 +1,37 @@
 # 🏗️ REDVILLE SAAS – TASK TRACKER
 
-## ✅ CONCLUÍDO (DINÂMICA & FINANCEIRO ELITE)
-- [x] **Mover Usuários:** Gestão de Usuários agora é em "Configurações".
-- [x] **Carteiras Customizadas:** Carteiras Dinâmicas (Dono, Empresa, Obra) em `CentrosCusto.jsx`.
-- [x] **Lançamentos Inteligentes:** Selects dinâmicos de Fornecedores e Carteiras reais.
-- [x] **Fix Nova Obra:** Persistência completa (Rua, Quadra, CEP, Cliente).
-- [x] **Cadastro Geral Acordeon:** Sub-itens invisíveis até o clique.
-- [x] **Gantt & Cronograma:** Visualização rica e cronograma automático.
+## ✅ Concluído
 
-## 🚧 EM ANDAMENTO (CONCILIAÇÃO & DOCUMENTOS)
-- [ ] **Conciliação de Carteiras:** Sistema de transferência entre carteiras para zerar "Dívidas Internas".
-- [ ] **Contratos de Obras:** Permitir anexo de PDF/Link de contrato no dossier da obra.
-- [ ] **Relatórios de Saldo:** Visão consolidada (Quem deve para quem) no dashboard.
-- [ ] **Filtro de Lançamentos:** Busca por fornecedor no histórico de caixa.
+- [x] **Gestão de Projetos (Obras)**: Adicionado botão de excluir com confirmação.
+- [x] **Módulo de Prestadores**: 
+    - [x] Vínculo de contratos com obras.
+    - [x] Controle financeiro por contrato (Acordado vs Pago).
+    - [x] Gestão de equipes (Funcionários).
+    - [x] **NOVO**: Status de contratos (Concluído/Cancelado).
+    - [x] **NOVO**: Anexo de documentos/links nos contratos.
+    - [x] **NOVO**: Edição e Exclusão total de colaboradores e contratos.
+- [x] **Fluxo de Caixa (Lançamentos)**:
+    - [x] Campo "Tipo" (Fornecedor, Prestador, Funcionário).
+    - [x] Seleção inteligente de favorecido baseada no tipo.
+    - [x] Vínculo automático de contrato ao selecionar prestador.
+    - [x] Remoção de ícones/emojis do campo favorecido para design mais limpo.
+    - [x] Correção no carregamento de Favorecidos (integrando Base de Prestadores).
 
-## 📅 PRÓXIMAS IMPLEMENTAÇÕES (IDEIAS DADOS.MD)
+## 🚧 Em Andamento (Próximos Passos)
+
+- [ ] **Transferência entre Centros de Custo**: Lógica para transferir saldo entre carteiras (ex: obra pagando dívida interna).
+- [ ] **Dashboard de Saldos**: Visão consolidada de todas as obras e contas.
+- [ ] **Relatórios PDF**: Exportação de fluxo de caixa e resumo de obra.
+- [ ] **Push & Deploy**: Sincronizar alterações com GitHub/Vercel.
+
+## 📌 Sugestões Futuras
+- Integração com WhatsApp para envio de comprovantes aos prestadores.
+- Notificações de contratos próximos ao fim do saldo.
+
+## 📅 PRÓXIMAS IMPLEMENTAÇÕES
 - [ ] **Fotos de Obra:** Galeria de evolução por etapa.
 - [ ] **Medição de Prestadores:** Sistema para liberar pagamento por % concluída.
 - [ ] **DRE Automática:** DRE por obra e consolidada da empresa.
 
 ---
-*Atualizado em: 16:20 - Antigravity Agent*
+*Atualizado em: 16 de Abril de 2026 - Antigravity Agent*

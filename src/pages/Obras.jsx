@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Plus, Eye, Building2, Pencil, X, Save } from 'lucide-react';
-import { useProjects, useAllStages, updateProject, createProject, useClients } from '../hooks/useData';
+import { Plus, Eye, Building2, Pencil, X, Save, Trash2 } from 'lucide-react';
+import { useProjects, useAllStages, updateProject, createProject, useClients, deleteProject } from '../hooks/useData';
 
 const STATUS_MAP = {
   active: { label: 'Em andamento' },
@@ -44,6 +44,12 @@ export default function ObrasPage({ onOpenProject }) {
 
   const totalBudget = projects.reduce((s, p) => s + Number(p.budget_total), 0);
   const progressoMedio = stages.length > 0 ? Math.round(stages.reduce((s, st) => s + Number(st.progress_pct), 0) / stages.length) : 0;
+  const handleDelete = async (id) => {
+    if (!confirm('Tem certeza que deseja excluir esta obra? Todos os dados vinculados serão perdidos.')) return;
+    const { error } = await deleteProject(id);
+    if (!error) refetch();
+    else alert('Erro ao excluir: ' + error.message);
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -103,6 +109,7 @@ export default function ObrasPage({ onOpenProject }) {
                     <div className="flex items-center justify-end gap-1">
                       <button onClick={() => onOpenProject(project.code)} className="p-2 text-slate-400 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all" title="Ver Detalhes"><Eye className="w-4 h-4" /></button>
                       <button onClick={() => setEditingProject(project)} className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all" title="Editar Obra"><Pencil className="w-4 h-4" /></button>
+                      <button onClick={() => handleDelete(project.id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Excluir Obra"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </tr>

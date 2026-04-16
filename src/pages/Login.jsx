@@ -12,19 +12,14 @@ export default function LoginPage({ onLoginSuccess }) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
-    // MASTER BYPASS FOR INITIAL SETUP
-    if (email === 'admin@redville.com' && password === 'AdminMaster2026') {
-      onLoginSuccess({ email: 'admin@redville.com', user_metadata: { name: 'Admin Master' } });
-      setLoading(false);
-      return;
-    }
+    
+    const lowerEmail = email.toLowerCase();
 
     // 2. CHECK DATABASE (ADMIN CREATED USERS)
     const { data: dbUser, error: dbError } = await supabase
       .from('profiles')
       .select('*')
-      .eq('email', email)
+      .ilike('email', lowerEmail)
       .eq('password', password)
       .single();
     
@@ -36,7 +31,7 @@ export default function LoginPage({ onLoginSuccess }) {
 
     // 3. SUPABASE AUTH
     const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email,
+      email: lowerEmail,
       password,
     });
 

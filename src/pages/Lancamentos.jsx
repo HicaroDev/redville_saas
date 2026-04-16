@@ -1,6 +1,9 @@
-import { useState } from 'react';
-import { Plus, X, Calendar, DollarSign, Wallet, User as UserIcon, Save, History, Pencil, Trash2 } from 'lucide-react';
-import { useProjects, useWallets, useDirectory, createCashbookEntry, updateCashbookEntry, deleteCashbookEntry, useCashbook } from '../hooks/useData';
+import { useState, useEffect, useMemo } from 'react';
+import { Plus, X, Calendar, DollarSign, Wallet, User as UserIcon, Save, History, Pencil, Trash2, Link as LinkIcon, FileCheck } from 'lucide-react';
+import { 
+    useProjects, useWallets, useDirectory, createCashbookEntry, 
+    updateCashbookEntry, deleteCashbookEntry, useCashbook, useServiceProviders 
+} from '../hooks/useData';
 
 const PAYMENT_METHODS = ['PIX', 'Boleto', 'Cartão', 'Transferência', 'Dinheiro'];
 
@@ -17,11 +20,12 @@ export default function LancamentosPage() {
 
   const { projects } = useProjects();
   const { wallets } = useWallets();
-  const { items: suppliers } = useDirectory('fornecedor');
-  const { items: providers } = useDirectory('prestador');
   const { entries, refetch } = useCashbook(filterProject);
-
-  const allPayees = [...suppliers, ...providers];
+  
+  // Data for different payee types
+  const { items: suppliers } = useDirectory('fornecedor');
+  const { providers: serviceProviders } = useServiceProviders();
+  const { items: employees } = useDirectory('funcionário');
 
   const [formData, setFormData] = useState({
     project_id: '',
@@ -31,8 +35,43 @@ export default function LancamentosPage() {
     payment_method: 'PIX',
     wallet_id: '',
     payee_name: '',
+    payer_name: '',
     category: 'despesa',
+    contract_id: null,
+    provider_id: null,
+    payee_type: 'fornecedor',
   });
+
+  const [availableContracts, setAvailableContracts] = useState([]);
+
+  // Determine which options to show in Favorecido select
+  const currentPayeeOptions = useMemo(() => {
+    if (formData.payee_type === 'prestador') return serviceProviders;
+    if (formData.payee_type === 'fornecedor') return suppliers;
+    if (formData.payee_type === 'funcionário') return employees;
+    return [];
+  }, [formData.payee_type, serviceProviders, suppliers, employees]);
+
+  const handlePayeeChange = async (name) => {
+    if (formData.payee_type === 'prestador') {
+      const provider = serviceProviders.find(p => p.name === name);
+      if (provider) {
+        setFormData(prev => ({ ...prev, payee_name: name, provider_id: provider.id }));
+        // Contracts are already fetched by the useServiceProviders hook for each provider
+        const contracts = provider.service_contracts || [];
+        setAvailableContracts(contracts);
+        if (contracts.length === 1) {
+            setFormData(prev => ({ ...prev, contract_id: contracts[0].id }));
+        }
+      } else {
+        setFormData(prev => ({ ...prev, payee_name: name, provider_id: null, contract_id: null }));
+        setAvailableContracts([]);
+      }
+    } else {
+      setFormData(prev => ({ ...prev, payee_name: name, provider_id: null, contract_id: null }));
+      setAvailableContracts([]);
+    }
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -50,8 +89,11 @@ export default function LancamentosPage() {
       income_amount: formData.category === 'receita' ? parseFloat(formData.amount) : 0,
       payment_method: formData.payment_method,
       wallet_id: formData.wallet_id || null,
+      payer_name: formData.payer_name || null,
       expense_source: formData.category === 'despesa' ? formData.payee_name : null,
       income_source: formData.category === 'receita' ? formData.payee_name : null,
+      provider_id: formData.provider_id || null,
+      contract_id: formData.contract_id || null,
     };
 
     const { error } = editingEntry 
@@ -60,9 +102,9 @@ export default function LancamentosPage() {
 
     if (!error) {
        setShowForm(false);
-       setEditingEntry(null);
-       setFormData({ project_id: '', description: '', entry_date: new Date().toISOString().split('T')[0], amount: '', payment_method: 'PIX', wallet_id: '', payee_name: '', category: 'despesa' });
-       refetch();
+        setEditingEntry(null);
+        setFormData({ project_id: '', description: '', entry_date: new Date().toISOString().split('T')[0], amount: '', payment_method: 'PIX', wallet_id: '', payee_name: '', payer_name: '', category: 'despesa', contract_id: null, provider_id: null, payee_type: 'fornecedor' });
+        refetch();
     } else {
        alert("Erro ao salvar: " + error.message);
     }
@@ -77,11 +119,11 @@ export default function LancamentosPage() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500 pb-12">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="rv-header border-none">Fluxo de Caixa</h1>
-          <p className="text-sm text-slate-500 font-medium italic">Gestão profissional de entradas e saídas</p>
+          <h1 className="rv-header border-none font-black tracking-tight">Fluxo de Caixa</h1>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 italic">Gestão profissional de entradas e saídas</p>
         </div>
         <button onClick={() => { setShowForm(!showForm); setEditingEntry(null); }} className="btn-primary-gradient flex items-center gap-2">
           {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
@@ -92,16 +134,53 @@ export default function LancamentosPage() {
       {(showForm || editingEntry) && (
         <form onSubmit={handleSave} className="rv-card space-y-6 animate-in slide-in-from-top duration-300">
            <div className="flex items-center justify-between border-b border-slate-50 pb-4">
-              <h3 className="font-bold text-slate-800">{editingEntry ? 'Editar Lançamento' : 'Novo Lançamento'}</h3>
-              <div className="flex bg-slate-100 p-1 rounded-lg">
-                <button type="button" onClick={() => setFormData({...formData, category: 'despesa'})} className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase transition-all ${formData.category === 'despesa' ? 'bg-white text-red-600 shadow-sm' : 'text-slate-400'}`}>Despesa</button>
-                <button type="button" onClick={() => setFormData({...formData, category: 'receita'})} className={`px-4 py-1.5 rounded-md text-[10px] font-bold uppercase transition-all ${formData.category === 'receita' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400'}`}>Receita</button>
+              <h3 className="font-bold text-slate-800 tracking-tight">{editingEntry ? 'Editar Lançamento' : 'Novo Lançamento'}</h3>
+              <div className="flex bg-slate-200/50 p-1 rounded-lg">
+                <button type="button" onClick={() => setFormData({...formData, category: 'despesa'})} className={`px-4 py-1.5 rounded-md text-[9px] font-bold uppercase transition-all ${formData.category === 'despesa' ? 'bg-white text-red-600 shadow-sm' : 'text-slate-400'}`}>Despesa</button>
+                <button type="button" onClick={() => setFormData({...formData, category: 'receita'})} className={`px-4 py-1.5 rounded-md text-[9px] font-bold uppercase transition-all ${formData.category === 'receita' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400'}`}>Receita</button>
               </div>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <FormField label="Tipo de Favorecido">
+                  <select className="form-input border-indigo-100 bg-indigo-50/10 font-bold" value={formData.payee_type} onChange={e => {
+                      const type = e.target.value;
+                      setFormData({...formData, payee_type: type, payee_name: '', contract_id: null, provider_id: null});
+                      setAvailableContracts([]);
+                  }}>
+                      <option value="fornecedor">Fornecedor (Materiais)</option>
+                      <option value="prestador">Prestador de Serviço (Mão de Obra)</option>
+                      <option value="funcionário">Funcionário / Colaborador</option>
+                  </select>
+              </FormField>
+              <FormField label="Favorecido (Quem recebe)">
+                 <select className="form-input font-medium" value={formData.payee_name} onChange={e => handlePayeeChange(e.target.value)}>
+                    <option value="">Selecione...</option>
+                    {currentPayeeOptions.map(item => <option key={item.id} value={item.name}>{item.name}</option>)}
+                 </select>
+              </FormField>
+              {formData.payee_type === 'prestador' && availableContracts.length > 0 && (
+                <FormField label="Contrato Vinculado">
+                  <select className="form-input border-amber-200 bg-amber-50/20 font-bold text-amber-900" value={formData.contract_id || ''} onChange={e => setFormData({...formData, contract_id: e.target.value})}>
+                      <option value="">Selecione o Contrato...</option>
+                      {availableContracts.map(c => <option key={c.id} value={c.id}>{c.description} ({formatCurrency(c.total_agreed_value)})</option>)}
+                  </select>
+                </FormField>
+              )}
               <FormField label="Obra Destino">
-                 <select className="form-input" value={formData.project_id} onChange={e => setFormData({...formData, project_id: e.target.value})} required>
+                 <select 
+                    className="form-input" 
+                    value={formData.project_id} 
+                    onChange={e => {
+                      const pid = e.target.value;
+                      setFormData({...formData, project_id: pid});
+                      if (pid) {
+                        const p = projects.find(x => x.id === pid);
+                        if (p) setFilterProject(p.code);
+                      }
+                    }} 
+                    required
+                 >
                     <option value="">Selecione...</option>
                     {projects.map(p => <option key={p.id} value={p.id}>{p.code} – {p.name}</option>)}
                  </select>
@@ -109,22 +188,20 @@ export default function LancamentosPage() {
               <FormField label="O que está pagando?">
                  <input type="text" className="form-input" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required placeholder="Ex: Cimento, Cal, Mão de obra..." />
               </FormField>
-              <FormField label="Favorecido">
-                 <select className="form-input" value={formData.payee_name} onChange={e => setFormData({...formData, payee_name: e.target.value})}>
-                    <option value="">Selecione da Base...</option>
-                    {allPayees.map(item => <option key={item.id} value={item.name}>{item.name}</option>)}
-                 </select>
+              
+              <FormField label="Quem está pagando?">
+                 <input type="text" className="form-input" value={formData.payer_name} onChange={e => setFormData({...formData, payer_name: e.target.value})} placeholder="Pessoa ou Empresa" />
               </FormField>
               <FormField label="Valor Total (R$)">
-                 <input type="number" step="0.01" className="form-input" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} required />
+                 <input type="number" step="0.01" className="form-input font-bold" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} required />
               </FormField>
-              <FormField label="Pago Por (Carteira)">
-                 <select className="form-input" value={formData.wallet_id} onChange={e => setFormData({...formData, wallet_id: e.target.value})} required>
-                    <option value="">Escolha a Carteira...</option>
+              <FormField label="Centro de Custo">
+                 <select className="form-input text-emerald-700 font-bold" value={formData.wallet_id} onChange={e => setFormData({...formData, wallet_id: e.target.value})} required>
+                    <option value="">Escolha o Centro...</option>
                     {wallets.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                  </select>
               </FormField>
-              <FormField label="Forma">
+              <FormField label="Forma de Pagamento">
                  <select className="form-input" value={formData.payment_method} onChange={e => setFormData({...formData, payment_method: e.target.value})}>
                     {PAYMENT_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
                  </select>
@@ -194,9 +271,10 @@ export default function LancamentosPage() {
                               amount: isExpense ? entry.expense_amount : entry.income_amount,
                               payment_method: entry.payment_method,
                               wallet_id: entry.wallet_id || '',
-                              payee_name: isExpense ? entry.expense_source : entry.income_source,
-                              category: isExpense ? 'despesa' : 'receita'
-                            });
+                               payee_name: isExpense ? entry.expense_source : entry.income_source,
+                               payer_name: entry.payer_name || '',
+                               category: isExpense ? 'despesa' : 'receita'
+                             });
                           }} className="p-1.5 text-slate-300 hover:text-amber-600 rounded-lg transition-colors"><Pencil className="w-3.5 h-3.5" /></button>
                           <button onClick={() => handleDelete(entry.id)} className="p-1.5 text-slate-300 hover:text-red-700 rounded-lg transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
                        </div>

@@ -7,7 +7,7 @@ import {
   useProjects, useStages, useBudgetItems, 
   createProjectStage, updateProjectStage, deleteProjectStage, 
   createBudgetItem, updateBudgetItem, deleteBudgetItem,
-  useResourceTypes 
+  useResourceTypes, useCashbook
 } from '../hooks/useData';
 
 const STATUS_MAP = {
@@ -35,6 +35,7 @@ const TABS = [
   { id: 'orcamento', label: 'Suprimentos / Orçamento' },
   { id: 'etapas', label: 'Etapas de Obra' },
   { id: 'compras', label: 'Lista de Compras' },
+  { id: 'caixa', label: 'Livro Caixa' },
   { id: 'gantt', label: 'Cronograma / Gantt' },
 ];
 
@@ -137,6 +138,7 @@ export default function ObraDetalhe({ projectCode, onBack }) {
       {activeTab === 'orcamento' && <OrcamentoTab budgetItems={budgetItems} stages={stageStats} projectId={project.id} onRefresh={refetchItems} />}
       {activeTab === 'etapas' && <EtapasTab stages={stageStats} projectId={project.id} budgetItems={budgetItems} onRefresh={refetchStages} />}
       {activeTab === 'compras' && <ComprasTab budgetItems={budgetItems} stages={stageStats} />}
+      {activeTab === 'caixa' && <CaixaTab projectCode={projectCode} />}
       {activeTab === 'gantt' && <GanttTab stages={stageStats} />}
     </div>
   );
@@ -740,6 +742,73 @@ function GanttTab({ stages }) {
          <span>Início: {minDate.toLocaleDateString('pt-BR')}</span>
          <span>Redville Obras - Cronograma Automático</span>
          <span>Fim: {maxDate.toLocaleDateString('pt-BR')}</span>
+      </div>
+    </div>
+  );
+}
+
+/* ===================== TAB: LIVRO CAIXA ===================== */
+function CaixaTab({ projectCode }) {
+  const { entries, loading } = useCashbook(projectCode);
+
+  if (loading) return <div className="flex justify-center p-20"><Loader2 className="w-8 h-8 animate-spin text-slate-300" /></div>;
+
+  const totalIn = entries.reduce((s, e) => s + (e.total_in || 0), 0);
+  const totalOut = entries.reduce((s, e) => s + (e.total_out || 0), 0);
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Entradas (Aportes)</p>
+          <p className="text-2xl font-bold text-emerald-600 mt-1">{formatCurrency(totalIn)}</p>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Saídas (Despesas)</p>
+          <p className="text-2xl font-bold text-red-600 mt-1">{formatCurrency(totalOut)}</p>
+        </div>
+        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Saldo Obra</p>
+          <p className={`text-2xl font-bold mt-1 ${totalIn - totalOut < 0 ? 'text-red-700' : 'text-emerald-700'}`}>
+            {formatCurrency(totalIn - totalOut)}
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-50/50">
+            <tr>
+              <th className="text-left py-3 px-6 text-[10px] font-bold text-slate-400 uppercase">Data</th>
+              <th className="text-left py-3 px-4 text-[10px] font-bold text-slate-400 uppercase">Descrição</th>
+              <th className="text-left py-3 px-4 text-[10px] font-bold text-slate-400 uppercase">Origem/Favorecido</th>
+              <th className="text-right py-3 px-6 text-[10px] font-bold text-slate-400 uppercase">Valor</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-50">
+            {entries.map(e => (
+              <tr key={e.id} className="hover:bg-slate-50/30 transition-colors">
+                <td className="py-4 px-6 text-slate-500 font-medium">
+                  {new Date(e.date).toLocaleDateString()}
+                </td>
+                <td className="py-4 px-4">
+                  <p className="font-bold text-slate-800">{e.description}</p>
+                </td>
+                <td className="py-4 px-4 text-slate-500 italic">
+                  {e.origin}
+                </td>
+                <td className={`py-4 px-6 text-right font-black ${e.total_out > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                  {e.total_out > 0 ? `- ${formatCurrency(e.total_out)}` : `+ ${formatCurrency(e.total_in)}`}
+                </td>
+              </tr>
+            ))}
+            {entries.length === 0 && (
+              <tr>
+                <td colSpan={4} className="py-20 text-center text-slate-400 italic">Nenhum lançamento financeiro para esta obra.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

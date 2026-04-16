@@ -14,6 +14,7 @@ import SettingsPage from './pages/Settings';
 import LoginPage from './pages/Login';
 import UsuariosPage from './pages/Usuarios';
 import ClientesPage from './pages/Clientes';
+import PrestadoresPage from './pages/Prestadores';
 
 function App() {
   const [activeMenu, setActiveMenu] = useState('dashboard');
@@ -98,11 +99,12 @@ function App() {
         return <EvolucaoPage />;
       case 'cadastros':
       case 'fornecedores':
-      case 'prestadores':
       case 'funcionarios':
       case 'materiais':
         const targetType = activeMenu === 'cadastros' ? 'fornecedores' : activeMenu;
         return <CadastroGeral type={targetType} />;
+      case 'prestadores':
+        return <PrestadoresPage />;
       case 'configuracoes':
       case 'configurações':
         return <SettingsPage user={session?.user} />;

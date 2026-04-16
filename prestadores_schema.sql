@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS service_contracts (
   description TEXT, -- Ex: "Alvenaria Galpão"
   unit_price DECIMAL(15,2), -- Ex: 32.00 (se for por m2)
   total_agreed_value DECIMAL(15,2), -- Valor total do contrato
+  status TEXT DEFAULT 'ativo', -- "ativo", "concluído", "cancelado"
   start_date DATE,
   contract_url TEXT, -- Link para o PDF/Documento anexado
   observations TEXT,

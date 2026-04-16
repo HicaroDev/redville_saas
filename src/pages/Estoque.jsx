@@ -28,7 +28,7 @@ export default function EstoquePage() {
 
   const [materialForm, setMaterialForm] = useState({
     name: '',
-    document: '',
+    unit: '',
     category: 'material'
   });
 
@@ -38,7 +38,7 @@ export default function EstoquePage() {
     const { error } = await createDirectoryItem(materialForm);
     if (!error) {
        setShowMaterialModal(false);
-       setMaterialForm({ name: '', document: '', category: 'material' });
+       setMaterialForm({ name: '', unit: '', category: 'material' });
        refetchMaterials();
     } else {
        alert('Erro ao cadastrar material: ' + error.message);
@@ -468,15 +468,18 @@ export default function EstoquePage() {
                             onChange={e => setMaterialForm({...materialForm, name: e.target.value})} 
                         />
                     </div>
-                    <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Código / Referência (Opcional)</label>
-                        <input 
-                            type="text" 
-                            placeholder="Ex: MAT-001" 
-                            className="form-input font-medium" 
-                            value={materialForm.document} 
-                            onChange={e => setMaterialForm({...materialForm, document: e.target.value})} 
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Unidade de Medida</label>
+                            <input 
+                                type="text" 
+                                required
+                                placeholder="Ex: m2, kg, un, m3..." 
+                                className="form-input font-medium" 
+                                value={materialForm.unit} 
+                                onChange={e => setMaterialForm({...materialForm, unit: e.target.value})} 
+                            />
+                        </div>
                     </div>
                 </div>
 

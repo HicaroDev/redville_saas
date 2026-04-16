@@ -27,12 +27,11 @@ export default function CadastroGeral({ type = 'fornecedores' }) {
     phone: '',
     email: '',
     category: config.db,
-    // Novos campos Fornecedor
+    unit: '',
     pix_key: '',
     bank_name: '',
     bank_agency: '',
     bank_account: '',
-    // Novos campos Funcionario
     rg: '',
     birth_date: '',
     role: '',
@@ -40,7 +39,6 @@ export default function CadastroGeral({ type = 'fornecedores' }) {
     hire_date: ''
   });
 
-  // Reset form when type changes
   useEffect(() => {
     setFormData({
       name: '',
@@ -48,6 +46,7 @@ export default function CadastroGeral({ type = 'fornecedores' }) {
       phone: '',
       email: '',
       category: config.db,
+      unit: '',
       pix_key: '',
       bank_name: '',
       bank_agency: '',
@@ -63,7 +62,6 @@ export default function CadastroGeral({ type = 'fornecedores' }) {
   const handleEdit = (item) => {
     setFormData({
       ...item,
-      // Garante que campos nulos sejam strings vazias para os inputs
       pix_key: item.pix_key || '',
       bank_name: item.bank_name || '',
       bank_agency: item.bank_agency || '',
@@ -72,7 +70,8 @@ export default function CadastroGeral({ type = 'fornecedores' }) {
       birth_date: item.birth_date || '',
       role: item.role || '',
       salary: item.salary || '',
-      hire_date: item.hire_date || ''
+      hire_date: item.hire_date || '',
+      unit: item.unit || ''
     });
     setShowModal(true);
   };
@@ -81,7 +80,6 @@ export default function CadastroGeral({ type = 'fornecedores' }) {
     e.preventDefault();
     setIsSaving(true);
     
-    // Limpa campos de data vazios (evita erro de sintaxe date: "")
     const cleanData = { ...formData };
     if (!cleanData.birth_date) cleanData.birth_date = null;
     if (!cleanData.hire_date) cleanData.hire_date = null;
@@ -93,7 +91,6 @@ export default function CadastroGeral({ type = 'fornecedores' }) {
 
     if (!error) {
       setShowModal(false);
-      setFormData({ name: '', document: '', phone: '', email: '', category: config.db });
       refetch();
     } else {
       alert('Erro ao salvar: ' + error.message);
@@ -134,7 +131,7 @@ export default function CadastroGeral({ type = 'fornecedores' }) {
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 italic text-left">Redville Directory</p>
           </div>
         </div>
-        <button onClick={() => { setFormData({ name: '', document: '', phone: '', email: '', category: config.db }); setShowModal(true); }} className="btn-primary-gradient flex items-center gap-2">
+        <button onClick={() => { setShowModal(true); }} className="btn-primary-gradient flex items-center gap-2">
            <Plus className="w-4 h-4" /> Novo Registro
         </button>
       </header>
@@ -171,31 +168,34 @@ export default function CadastroGeral({ type = 'fornecedores' }) {
              
              <div className="flex-1 mb-6">
                 <h3 className="text-lg font-bold text-slate-900 tracking-tight mb-1">{item.name}</h3>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.document || 'Sem Documento'}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    {config.db === 'material' ? `Unidade: ${item.unit || '—'}` : (item.document || 'Sem Documento')}
+                </p>
                 
-                {/* Specific badges based on type */}
                 <div className="flex flex-wrap gap-2 mt-4">
                     {item.role && <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[10px] font-bold rounded uppercase">{item.role}</span>}
                     {item.pix_key && <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-bold rounded uppercase">PIX Ativo</span>}
                 </div>
              </div>
              
-             <div className="space-y-3 pt-6 border-t border-slate-50">
-                <div className="flex items-center gap-3">
-                   <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300"><Phone className="w-3.5 h-3.5" /></div>
-                   <span className="text-xs font-semibold text-slate-500">{item.phone || '—'}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                   <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300"><Mail className="w-3.5 h-3.5" /></div>
-                   <span className="text-xs font-semibold text-slate-500 truncate max-w-[180px]">{item.email || '—'}</span>
-                </div>
-                {item.salary > 0 && (
+             {config.db !== 'material' && (
+                <div className="space-y-3 pt-6 border-t border-slate-50">
                     <div className="flex items-center gap-3">
-                       <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300"><DollarSign className="w-3.5 h-3.5" /></div>
-                       <span className="text-xs font-bold text-slate-900">{formatCurrency(item.salary)}</span>
+                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300"><Phone className="w-3.5 h-3.5" /></div>
+                    <span className="text-xs font-semibold text-slate-500">{item.phone || '—'}</span>
                     </div>
-                )}
-             </div>
+                    <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300"><Mail className="w-3.5 h-3.5" /></div>
+                    <span className="text-xs font-semibold text-slate-500 truncate max-w-[180px]">{item.email || '—'}</span>
+                    </div>
+                    {item.salary > 0 && (
+                        <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-300"><DollarSign className="w-3.5 h-3.5" /></div>
+                        <span className="text-xs font-bold text-slate-900">{formatCurrency(item.salary)}</span>
+                        </div>
+                    )}
+                </div>
+             )}
           </div>
         ))}
       </div>
@@ -219,23 +219,32 @@ export default function CadastroGeral({ type = 'fornecedores' }) {
                <form onSubmit={handleSave} className="p-10 space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                      <div className="space-y-2 md:col-span-2">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic px-1">Nome Completo / Razão Social</label>
-                        <input type="text" required placeholder="Ex: João da Silva ou Empresa LTDA" className="form-input" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-                     </div>
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic px-1">Documento (CPF / CNPJ)</label>
-                        <input type="text" placeholder="000.000.000-00" className="form-input" value={formData.document} onChange={e => setFormData({...formData, document: e.target.value})} />
-                     </div>
-                     <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic px-1">Telefone / WhatsApp</label>
-                        <input type="text" placeholder="(00) 00000-0000" className="form-input" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
-                     </div>
-                     <div className="space-y-2 md:col-span-2">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic px-1">Email Principal</label>
-                        <input type="email" placeholder="email@exemplo.com" className="form-input" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic px-1">Nome Completo / Material</label>
+                        <input type="text" required placeholder="Ex: Cimento CP-II ou João da Silva" className="form-input" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                      </div>
 
-                     {/* Campos Específicos para Fornecedores */}
+                     {config.db === 'material' ? (
+                        <div className="space-y-2 md:col-span-2">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic px-1">Unidade de Medida</label>
+                            <input type="text" required placeholder="Ex: m2, kg, un, m3..." className="form-input font-bold text-red-700 italic" value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} />
+                        </div>
+                     ) : (
+                        <>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic px-1">Documento (CPF / CNPJ)</label>
+                                <input type="text" placeholder="000.000.000-00" className="form-input" value={formData.document} onChange={e => setFormData({...formData, document: e.target.value})} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic px-1">Telefone / WhatsApp</label>
+                                <input type="text" placeholder="(00) 00000-0000" className="form-input" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+                            </div>
+                            <div className="space-y-2 md:col-span-2">
+                                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic px-1">Email Principal</label>
+                                <input type="email" placeholder="email@exemplo.com" className="form-input" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                            </div>
+                        </>
+                     )}
+
                      {config.db === 'fornecedor' && (
                         <div className="col-span-full pt-6 space-y-6 border-t border-slate-100">
                            <div className="flex items-center gap-3">
@@ -265,7 +274,6 @@ export default function CadastroGeral({ type = 'fornecedores' }) {
                         </div>
                      )}
 
-                     {/* Campos Específicos para Funcionários */}
                      {config.db === 'funcionario' && (
                         <div className="col-span-full pt-6 space-y-6 border-t border-slate-100">
                            <div className="flex items-center gap-3">
@@ -313,7 +321,6 @@ export default function CadastroGeral({ type = 'fornecedores' }) {
   );
 }
 
-// Helper icon
 function UserIcon({ className }) {
     return <User className={className} />;
 }

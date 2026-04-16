@@ -378,6 +378,14 @@ export async function createDirectoryItem(itemData) {
   return await supabase.from('directory').insert(itemData).select().single();
 }
 
+export async function updateDirectoryItem(id, updates) {
+  return await supabase.from('directory').update(updates).eq('id', id).select().single();
+}
+
+export async function deleteDirectoryItem(id) {
+  return await supabase.from('directory').delete().eq('id', id);
+}
+
 // ========== PRESTADORES DE SERVIÇO ==========
 export function useServiceProviders() {
   const [providers, setProviders] = useState([]);

@@ -25,7 +25,7 @@ export default function LancamentosPage() {
   // Data for different payee types
   const { items: suppliers } = useDirectory('fornecedor');
   const { providers: serviceProviders } = useServiceProviders();
-  const { items: employees } = useDirectory('funcionário');
+  const { items: employees } = useDirectory('funcionario');
 
   const [formData, setFormData] = useState({
     project_id: '',

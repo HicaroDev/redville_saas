@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { 
   Plus, X, Phone, Mail, FileText, Search, User, Briefcase, Save, Trash2, 
   ChevronRight, Calendar, DollarSign, Users, ExternalLink, Activity,
-  ArrowRight, CheckCircle2, AlertCircle, Loader2, Pencil
+  ArrowRight, CheckCircle2, AlertCircle, Loader2, Pencil, History
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useProjects } from '../hooks/useData';
@@ -98,16 +98,22 @@ export default function PrestadoresPage() {
   const handleSaveProvider = async (e) => {
     e.preventDefault();
     setIsSaving(true);
+    
+    // Sanitize data: pick only table columns
+    const { id, name, document, phone, email, employees, status } = formData;
+    const cleanData = { name, document, phone, email, employees, status };
+    if (id) cleanData.id = id;
+
     const { error } = await supabase
       .from('service_providers')
-      .upsert(formData);
+      .upsert(cleanData);
 
     if (!error) {
       setShowModal(false);
       fetchProviders();
       setFormData({ name: '', document: '', phone: '', email: '', employees: [] });
     } else {
-      alert('Erro: ' + error.message);
+      alert('Erro ao salvar prestador: ' + error.message);
     }
     setIsSaving(false);
   };
@@ -151,6 +157,13 @@ export default function PrestadoresPage() {
   const handleUpdateContractStatus = async (id, status) => {
     const { error } = await supabase.from('service_contracts').update({ status }).eq('id', id);
     if (!error) fetchProviders();
+  };
+
+  const handleDeleteProvider = async (id) => {
+    if (!confirm('Excluir este prestador e todos os seus contratos permanentemente?')) return;
+    const { error } = await supabase.from('service_providers').delete().eq('id', id);
+    if (!error) fetchProviders();
+    else alert('Erro ao excluir prestador: ' + error.message);
   };
 
   const addEmployee = () => {
@@ -388,7 +401,7 @@ export default function PrestadoresPage() {
                    <button className="p-2.5 bg-slate-50 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-all" title="Email"><Mail className="w-4 h-4" /></button>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button className="p-2.5 text-slate-300 hover:text-red-700 transition-all"><Trash2 className="w-4 h-4" /></button>
+                    <button onClick={() => handleDeleteProvider(p.id)} className="p-2.5 text-slate-300 hover:text-red-700 transition-all" title="Excluir Prestador"><Trash2 className="w-4 h-4" /></button>
                     <button onClick={() => { setFormData(p); setShowModal(true); }} className="px-6 py-2.5 bg-slate-900 hover:bg-red-700 text-white text-[10px] font-bold rounded-xl transition-all uppercase tracking-[0.2em] shadow-lg shadow-slate-100">Configurar</button>
                 </div>
              </div>

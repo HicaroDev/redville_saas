@@ -29,19 +29,43 @@ export default function EstoquePage() {
   const [materialForm, setMaterialForm] = useState({
     name: '',
     unit: '',
-    category: 'material'
+    category: 'material',
+    addInitialStock: false,
+    initialQuantity: '',
+    project_id: '',
+    cashbook_entry_id: ''
   });
 
   const handleSaveMaterial = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const { error } = await createDirectoryItem(materialForm);
-    if (!error) {
+    
+    const { data: newItem, error } = await createDirectoryItem({
+        name: materialForm.name,
+        unit: materialForm.unit,
+        category: materialForm.category
+    });
+
+    if (!error && newItem) {
+       // Se o usuário optou por adicionar saldo inicial
+       if (materialForm.addInitialStock && materialForm.project_id && materialForm.initialQuantity) {
+           await createStockMovement({
+               material_id: newItem.id,
+               project_id: materialForm.project_id,
+               quantity: materialForm.initialQuantity,
+               type: 'entrada',
+               description: 'Entrada Inicial no Cadastro',
+               cashbook_entry_id: materialForm.cashbook_entry_id || null,
+               entry_date: new Date().toISOString().split('T')[0]
+           });
+       }
+
        setShowMaterialModal(false);
-       setMaterialForm({ name: '', unit: '', category: 'material' });
+       setMaterialForm({ name: '', unit: '', category: 'material', addInitialStock: false, initialQuantity: '', project_id: '', cashbook_entry_id: '' });
        refetchMaterials();
+       refetchStock();
     } else {
-       alert('Erro ao cadastrar material: ' + error.message);
+       alert('Erro ao cadastrar material: ' + (error?.message || 'Erro desconhecido'));
     }
     setIsSubmitting(false);
   };
@@ -99,6 +123,11 @@ export default function EstoquePage() {
 
   const totalEstoqueValor = stock.reduce((acc, curr) => acc + (Number(curr.quantity) * 0), 0); // Placeholder para lógica de valor futuro
 
+  // Cálculo de estatísticas rápidas
+  const totalItens = stock.length;
+  const obrasAtivas = [...new Set(stock.map(s => s.projects?.id))].length;
+  const itensBaixoEstoque = stock.filter(s => s.quantity <= 5).length;
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-20">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -108,7 +137,7 @@ export default function EstoquePage() {
           </div>
           <div>
             <h1 className="rv-header border-none">Gestão de Estoque</h1>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 italic text-left">Materiais & Insumos</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 italic text-left">Controle de Materiais e Custo de Obra</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -124,7 +153,7 @@ export default function EstoquePage() {
             >
                 Movimentações
             </button>
-            <button onClick={() => setShowMaterialModal(true)} className="ml-2 bg-white text-slate-700 border border-slate-100 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm">
+            <button onClick={() => setShowMaterialModal(true)} className="ml-2 bg-white text-slate-700 border border-slate-100 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-slate-50 transition-all shadow-sm shadow-red-100">
                <Layers className="w-4 h-4 text-red-700" /> Cadastrar Material
             </button>
             <button onClick={() => setShowModal(true)} className="ml-2 btn-primary-gradient flex items-center gap-2">
@@ -132,6 +161,37 @@ export default function EstoquePage() {
             </button>
         </div>
       </header>
+
+      {/* PAINEL DE INDICADORES */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
+            <div className="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-700">
+               <Package className="w-6 h-6" />
+            </div>
+            <div>
+               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Total de Itens</p>
+               <h4 className="text-2xl font-black text-slate-900 tracking-tighter">{totalItens} <span className="text-xs font-bold text-slate-300">Insumos</span></h4>
+            </div>
+         </div>
+         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
+            <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-700">
+               <Building2 className="w-6 h-6" />
+            </div>
+            <div>
+               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Obras Ativas</p>
+               <h4 className="text-2xl font-black text-slate-900 tracking-tighter">{obrasAtivas} <span className="text-xs font-bold text-slate-300">Canteiros</span></h4>
+            </div>
+         </div>
+         <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
+            <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-700">
+               <History className="w-6 h-6" />
+            </div>
+            <div>
+               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Alertas de Estoque</p>
+               <h4 className="text-2xl font-black text-slate-900 tracking-tighter">{itensBaixoEstoque} <span className="text-xs font-bold text-slate-300">Reposições</span></h4>
+            </div>
+         </div>
+      </div>
 
       {/* FILTROS E BUSCA */}
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center bg-white p-4 rounded-3xl border border-slate-50 shadow-sm">
@@ -496,6 +556,66 @@ export default function EstoquePage() {
                                 onChange={e => setMaterialForm({...materialForm, unit: e.target.value})} 
                             />
                         </div>
+                    </div>
+
+                    {/* VINCULO INICIAL OPCIONAL */}
+                    <div className="pt-4 border-t border-slate-100">
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                             <input 
+                                type="checkbox" 
+                                className="w-5 h-5 rounded-lg border-slate-200 text-red-700 focus:ring-red-600 transition-all cursor-pointer"
+                                checked={materialForm.addInitialStock}
+                                onChange={e => setMaterialForm({...materialForm, addInitialStock: e.target.checked})}
+                             />
+                             <span className="text-xs font-bold text-slate-500 uppercase tracking-widest group-hover:text-red-700 transition-colors">Vincular Compra e Saldo Inicial?</span>
+                        </label>
+
+                        {materialForm.addInitialStock && (
+                            <div className="mt-6 space-y-6 p-6 bg-slate-50 rounded-[2rem] border border-slate-100 animate-in slide-in-from-top-4 duration-300">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Obra de Destino</label>
+                                    <select 
+                                        required={materialForm.addInitialStock}
+                                        className="form-input bg-white" 
+                                        value={materialForm.project_id} 
+                                        onChange={e => setFormData({...materialForm, project_id: e.target.value})}
+                                    >
+                                        <option value="">Selecione a Obra</option>
+                                        {projects.map(p => (
+                                            <option key={p.id} value={p.id}>{p.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Qtd Inicial</label>
+                                        <input 
+                                            type="number" 
+                                            required={materialForm.addInitialStock}
+                                            placeholder="0" 
+                                            className="form-input bg-white" 
+                                            value={materialForm.initialQuantity} 
+                                            onChange={e => setMaterialForm({...materialForm, initialQuantity: e.target.value})} 
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 italic">Vincular à uma Compra</label>
+                                        <select 
+                                            className="form-input bg-white text-[10px]" 
+                                            value={materialForm.cashbook_entry_id} 
+                                            onChange={e => setMaterialForm({...materialForm, cashbook_entry_id: e.target.value})}
+                                        >
+                                            <option value="">Nenhuma vínculo (Opcional)</option>
+                                            {purchases.filter(p => p.category === 'despesa').slice(0, 10).map(p => (
+                                                <option key={p.id} value={p.id}>{p.payee_name} - R$ {p.total_out}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                <p className="text-[9px] text-red-600 font-medium px-1 underline uppercase">Isso criará uma entrada automática no estoque após o cadastro.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 

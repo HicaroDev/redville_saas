@@ -15,6 +15,7 @@ import LoginPage from './pages/Login';
 import UsuariosPage from './pages/Usuarios';
 import ClientesPage from './pages/Clientes';
 import PrestadoresPage from './pages/Prestadores';
+import EstoquePage from './pages/Estoque';
 
 function App() {
   const [activeMenu, setActiveMenu] = useState('dashboard');
@@ -105,6 +106,8 @@ function App() {
         return <CadastroGeral type={targetType} />;
       case 'prestadores':
         return <PrestadoresPage />;
+      case 'estoque':
+        return <EstoquePage />;
       case 'configuracoes':
       case 'configurações':
         return <SettingsPage user={session?.user} />;

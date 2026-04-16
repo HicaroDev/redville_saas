@@ -412,3 +412,46 @@ export function useServiceProviders() {
 export async function updateServiceContract(id, updates) {
   return await supabase.from('service_contracts').update(updates).eq('id', id).select().single();
 }
+
+// ========== ESTOQUE DE MATERIAIS ==========
+export function useStock() {
+  const [stock, setStock] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchStock = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('material_stock')
+      .select('*, directory(name), projects(name)')
+      .order('updated_at', { ascending: false });
+    
+    if (!error && data) setStock(data);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchStock(); }, [fetchStock]);
+  return { stock, loading, refetch: fetchStock };
+}
+
+export function useStockMovements() {
+  const [movements, setMovements] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchMovements = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('stock_movements')
+      .select('*, directory(name), from_project:projects!from_project_id(name), to_project:projects!to_project_id(name)')
+      .order('created_at', { ascending: false });
+    
+    if (!error && data) setMovements(data);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchMovements(); }, [fetchMovements]);
+  return { movements, loading, refetch: fetchMovements };
+}
+
+export async function createStockMovement(movementData) {
+  return await supabase.from('stock_movements').insert(movementData).select().single();
+}

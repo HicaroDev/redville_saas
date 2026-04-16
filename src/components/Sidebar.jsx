@@ -19,7 +19,9 @@ import {
   Layers,
   FileSearch,
   PieChart,
-  Megaphone
+  PieChart,
+  Megaphone,
+  Package
 } from 'lucide-react';
 
 export default function Sidebar({ activePage, onMenuChange }) {
@@ -76,6 +78,7 @@ export default function Sidebar({ activePage, onMenuChange }) {
             <SidebarItem icon={BarChart3} label="Dashboard" active={activePage === 'dashboard'} onClick={() => onMenuChange('dashboard')} />
             <SidebarItem icon={Users} label="Clientes" active={activePage === 'clientes'} onClick={() => onMenuChange('clientes')} />
             <SidebarItem icon={Building2} label="Obras" active={activePage === 'obras'} onClick={() => onMenuChange('obras')} />
+            <SidebarItem icon={Package} label="Estoque" active={activePage === 'estoque'} onClick={() => onMenuChange('estoque')} />
             <SidebarItem icon={Calendar} label="Cronograma" future />
             
             <div className="px-5 py-4">

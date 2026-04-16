@@ -41,3 +41,16 @@ PRECISO QUE MODULO PRESTADOR DE SERVIÇO SEJA SEPARADO DO FORNECEDOR ,
 ## Prestador de serviço
 - me permitir mexer nas prestação e serviço daquele prestador  e ter a opção de anexar , concluido cancelado , e mesma coisa os funcionarios daquela pessoa , eu poder excluir e adicionar funcionarios daquele prestador de serviço .
 
+
+## FORNECEDOR
+
+- Ter a opção de editar o cadastro de fornecedor ,  dados pix e dados bancarios , 
+
+## Funcionarios
+
+-la no lançamento aparece os funcionarios cadastrado,, 
+- no cadastro de funcionarios, vamos pegar maximo de dados uteis 
+
+# Gestão de Obras
+
+- criar modulo de estoque de materiais ,  ter o controle dos materias compros e onde estao estocado e se ja foram utilizado . 

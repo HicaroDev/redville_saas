@@ -1,0 +1,357 @@
+import { useState } from 'react';
+import { Package, Plus, Search, History, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Building2, Filter, Save, X, Layers } from 'lucide-react';
+import { useStock, useStockMovements, createStockMovement, useDirectory, useProjects } from '../hooks/useData';
+
+export default function EstoquePage() {
+  const [activeTab, setActiveTab] = useState('saldo'); // 'saldo' ou 'movimentacoes'
+  const [showModal, setShowModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { stock, loading: loadingStock, refetch: refetchStock } = useStock();
+  const { movements, loading: loadingMovements, refetch: refetchMovements } = useStockMovements();
+  const { items: materials } = useDirectory('material');
+  const { projects } = useProjects();
+
+  const [formData, setFormData] = useState({
+    material_id: '',
+    from_project_id: '',
+    to_project_id: '',
+    quantity: '',
+    type: 'entrada',
+    description: '',
+    entry_date: new Date().toISOString().split('T')[0]
+  });
+
+  const handleSaveMovement = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    const data = { ...formData };
+    if (data.type === 'entrada') data.from_project_id = null;
+    if (data.type === 'saída') data.to_project_id = null;
+    
+    const { error } = await createStockMovement(data);
+    
+    if (!error) {
+      setShowModal(false);
+      setFormData({
+        material_id: '',
+        from_project_id: '',
+        to_project_id: '',
+        quantity: '',
+        type: 'entrada',
+        description: '',
+        entry_date: new Date().toISOString().split('T')[0]
+      });
+      refetchStock();
+      refetchMovements();
+    } else {
+      alert('Erro ao registrar movimentação: ' + error.message);
+    }
+    setIsSubmitting(false);
+  };
+
+  const filteredStock = stock.filter(item => 
+    item.directory?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.projects?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500 pb-20">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-white rounded-xl shadow-sm border border-slate-100">
+             <Package className="w-5 h-5 text-slate-800" />
+          </div>
+          <div>
+            <h1 className="rv-header border-none">Gestão de Estoque</h1>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 italic text-left">Materiais & Insumos</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+            <button 
+                onClick={() => setActiveTab('saldo')} 
+                className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'saldo' ? 'bg-red-700 text-white shadow-lg shadow-red-700/20' : 'bg-white text-slate-400 hover:text-slate-600 border border-slate-100'}`}
+            >
+                Saldo Atual
+            </button>
+            <button 
+                onClick={() => setActiveTab('movimentacoes')} 
+                className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'movimentacoes' ? 'bg-red-700 text-white shadow-lg shadow-red-700/20' : 'bg-white text-slate-400 hover:text-slate-600 border border-slate-100'}`}
+            >
+                Movimentações
+            </button>
+            <button onClick={() => setShowModal(true)} className="ml-2 btn-primary-gradient flex items-center gap-2">
+               <Plus className="w-4 h-4" /> Nova Movimentação
+            </button>
+        </div>
+      </header>
+
+      {/* FILTROS E BUSCA */}
+      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center bg-white p-4 rounded-3xl border border-slate-50 shadow-sm">
+        <div className="relative group flex-1">
+           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-hover:text-red-700 transition-colors" />
+           <input 
+              type="text" 
+              placeholder="Buscar material ou obra..."
+              className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50/50 border border-transparent focus:bg-white focus:border-red-600/30 transition-all text-sm outline-none"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+           />
+        </div>
+      </div>
+
+      {activeTab === 'saldo' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {loadingStock ? (
+             <div className="col-span-full py-20 text-center flex flex-col items-center gap-4">
+               <div className="w-10 h-10 border-4 border-red-700 border-t-transparent rounded-full animate-spin"></div>
+               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Carregando estoque...</p>
+             </div>
+          ) : filteredStock.length === 0 ? (
+            <div className="col-span-full py-24 text-center bg-white rounded-[2.5rem] border border-dashed border-slate-200">
+               <Package className="w-12 h-12 text-slate-200 mx-auto mb-4" />
+               <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] italic">Estoque vazio</p>
+               <p className="text-[10px] text-slate-300 mt-2">Registre entradas de materiais para começar o controle.</p>
+            </div>
+          ) : filteredStock.map(item => (
+            <div key={item.id} className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 group hover:border-red-600/20 transition-all duration-300">
+               <div className="flex items-center justify-between mb-6">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-red-700 group-hover:text-white transition-all duration-300 shadow-inner">
+                     <Layers className="w-6 h-6" />
+                  </div>
+                  <div className="px-3 py-1 bg-slate-50 rounded-lg text-slate-400 text-[10px] font-bold uppercase">
+                     {item.unit || 'un'}
+                  </div>
+               </div>
+               
+               <h3 className="text-lg font-bold text-slate-800 tracking-tight mb-1">{item.directory?.name}</h3>
+               <div className="flex items-center gap-2 mb-6">
+                  <Building2 className="w-3.5 h-3.5 text-red-600/40" />
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.projects?.name}</span>
+               </div>
+
+               <div className="pt-6 border-t border-slate-50 flex items-end justify-between">
+                  <div>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 italic">Quantidade em mãos</p>
+                    <p className="text-3xl font-black text-slate-900 tracking-tighter">
+                        {item.quantity} <span className="text-sm font-bold text-slate-300">{item.unit || 'un'}</span>
+                    </p>
+                  </div>
+                  {item.quantity <= 10 && (
+                      <div className="px-2 py-1 bg-amber-50 rounded-lg animate-pulse">
+                         <span className="text-[9px] font-black text-amber-600 uppercase">Estoque Baixo</span>
+                      </div>
+                  )}
+               </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100">
+                  <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Data</th>
+                  <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Material</th>
+                  <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Tipo</th>
+                  <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Origem / Destino</th>
+                  <th className="px-8 py-5 text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] text-right">Qtd.</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {loadingMovements ? (
+                  <tr><td colSpan="5" className="py-20 text-center"><div className="w-8 h-8 border-4 border-red-700 border-t-transparent rounded-full animate-spin mx-auto"></div></td></tr>
+                ) : movements.map(mov => (
+                  <tr key={mov.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-8 py-5">
+                      <p className="text-xs font-bold text-slate-700">{new Date(mov.entry_date).toLocaleDateString()}</p>
+                    </td>
+                    <td className="px-8 py-5">
+                      <p className="text-sm font-bold text-slate-900 leading-tight">{mov.directory?.name}</p>
+                      <p className="text-[10px] text-slate-400 font-medium truncate max-w-[200px]">{mov.description || 'Nenhuma observação'}</p>
+                    </td>
+                    <td className="px-8 py-5">
+                       <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest ${
+                         mov.type === 'entrada' ? 'bg-emerald-50 text-emerald-600' :
+                         mov.type === 'saída' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
+                       }`}>
+                         {mov.type === 'entrada' ? <ArrowUpRight className="w-3 h-3" /> : 
+                          mov.type === 'saída' ? <ArrowDownRight className="w-3 h-3" /> : <ArrowRightLeft className="w-3 h-3" />}
+                         {mov.type}
+                       </span>
+                    </td>
+                    <td className="px-8 py-5">
+                        <div className="flex flex-col gap-1">
+                            {mov.from_project && <span className="text-[10px] font-bold text-slate-400 uppercase"><span className="text-red-700/50 mr-1">DE:</span> {mov.from_project.name}</span>}
+                            {mov.to_project && <span className="text-[10px] font-bold text-slate-900 uppercase"><span className="text-emerald-700/50 mr-1">PARA:</span> {mov.to_project.name}</span>}
+                        </div>
+                    </td>
+                    <td className="px-8 py-5 text-right">
+                       <p className="text-sm font-black text-slate-900">{mov.quantity}</p>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-xl my-8 overflow-hidden animate-in zoom-in-95 duration-200">
+             <div className="px-10 py-8 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center gap-4">
+                   <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center text-red-700">
+                      <Plus className="w-6 h-6" />
+                   </div>
+                   <div>
+                      <h3 className="text-xl font-bold text-slate-800 tracking-tight">Nova Movimentação</h3>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 italic text-left">Controle de Materiais</p>
+                   </div>
+                </div>
+                <button onClick={() => setShowModal(false)} className="w-10 h-10 hover:bg-white hover:shadow-md rounded-2xl transition-all flex items-center justify-center"><X className="w-5 h-5 text-slate-400" /></button>
+             </div>
+
+             <form onSubmit={handleSaveMovement} className="p-10 space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                    <button 
+                        type="button"
+                        onClick={() => setFormData({...formData, type: 'entrada'})}
+                        className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${formData.type === 'entrada' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-50 text-slate-400 hover:border-slate-100'}`}
+                    >
+                        <ArrowUpRight className="w-6 h-6" />
+                        <span className="text-[10px] font-bold uppercase">Entrada</span>
+                    </button>
+                    <button 
+                        type="button"
+                        onClick={() => setFormData({...formData, type: 'saída'})}
+                        className={`p-4 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${formData.type === 'saída' ? 'border-red-500 bg-red-50 text-red-700' : 'border-slate-50 text-slate-400 hover:border-slate-100'}`}
+                    >
+                        <ArrowDownRight className="w-6 h-6" />
+                        <span className="text-[10px] font-bold uppercase">Saída / Uso</span>
+                    </button>
+                    <button 
+                        type="button"
+                        onClick={() => setFormData({...formData, type: 'transferência'})}
+                        className={`col-span-2 p-4 rounded-2xl border-2 transition-all flex items-center justify-center gap-3 ${formData.type === 'transferência' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-50 text-slate-400 hover:border-slate-100'}`}
+                    >
+                        <ArrowRightLeft className="w-5 h-5" />
+                        <span className="text-[10px] font-bold uppercase">Transferência entre Obras</span>
+                    </button>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Material</label>
+                        <select 
+                            required 
+                            className="form-input" 
+                            value={formData.material_id} 
+                            onChange={e => setFormData({...formData, material_id: e.target.value})}
+                        >
+                            <option value="">Selecione o Material</option>
+                            {materials.map(m => (
+                                <option key={m.id} value={m.id}>{m.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Quantidade</label>
+                            <input 
+                                type="number" 
+                                required 
+                                step="0.01" 
+                                className="form-input" 
+                                placeholder="0.00"
+                                value={formData.quantity}
+                                onChange={e => setFormData({...formData, quantity: e.target.value})}
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Data</label>
+                            <input 
+                                type="date" 
+                                required 
+                                className="form-input" 
+                                value={formData.entry_date}
+                                onChange={e => setFormData({...formData, entry_date: e.target.value})}
+                            />
+                        </div>
+                    </div>
+
+                    {(formData.type === 'saída' || formData.type === 'transferência') && (
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Origem (Saindo de onde?)</label>
+                            <select 
+                                required 
+                                className="form-input" 
+                                value={formData.from_project_id} 
+                                onChange={e => setFormData({...formData, from_project_id: e.target.value})}
+                            >
+                                <option value="">Selecione a Localização de Origem</option>
+                                {projects.map(p => (
+                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    {(formData.type === 'entrada' || formData.type === 'transferência') && (
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Destino (Entrando para onde?)</label>
+                            <select 
+                                required 
+                                className="form-input" 
+                                value={formData.to_project_id} 
+                                onChange={e => setFormData({...formData, to_project_id: e.target.value})}
+                            >
+                                <option value="">Selecione a Obra de Destino</option>
+                                {projects.map(p => (
+                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Observações</label>
+                        <textarea 
+                            rows="2" 
+                            className="form-input resize-none py-3" 
+                            placeholder="Motivo do uso, número da nota, etc..."
+                            value={formData.description}
+                            onChange={e => setFormData({...formData, description: e.target.value})}
+                        ></textarea>
+                    </div>
+                </div>
+
+                <div className="flex gap-4 pt-6">
+                    <button 
+                        type="button" 
+                        onClick={() => setShowModal(false)}
+                        className="flex-1 py-4 font-bold text-slate-400 text-[10px] uppercase tracking-widest"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="submit" 
+                        disabled={isSubmitting}
+                        className="flex-1 bg-slate-900 text-white rounded-2xl text-[10px] font-bold uppercase tracking-[0.2em] shadow-xl hover:bg-red-700 transition-all flex items-center justify-center gap-2"
+                    >
+                        {isSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save className="w-4 h-4" />}
+                        Confirmar Movimentação
+                    </button>
+                </div>
+             </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

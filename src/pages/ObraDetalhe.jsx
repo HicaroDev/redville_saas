@@ -30,6 +30,13 @@ function formatCurrency(value) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 }).format(value);
 }
 
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  // Adiciona T00:00:00 para garantir que o navegador interprete como horário local e não UTC
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('pt-BR');
+}
+
 const TABS = [
   { id: 'overview', label: 'Visão Geral' },
   { id: 'orcamento', label: 'Suprimentos / Orçamento' },
@@ -339,7 +346,7 @@ function EtapasTab({ stages, projectId, onRefresh }) {
                       </div>
                       <div className="flex items-center gap-3 mt-1">
                         <p className="text-[10px] text-slate-400 font-normal tabular-nums">
-                           {s.planned_start ? new Date(s.planned_start).toLocaleDateString() : '—'} a {s.planned_end ? new Date(s.planned_end).toLocaleDateString() : '—'}
+                           {s.planned_start ? formatDate(s.planned_start) : '—'} a {s.planned_end ? formatDate(s.planned_end) : '—'}
                         </p>
                         <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 rounded">{s.totalDays}d (Calc. Orçamento)</span>
                         {s.responsible && <span className="text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded uppercase font-bold">{s.responsible}</span>}
@@ -739,9 +746,9 @@ function GanttTab({ stages }) {
       
       {/* Timeline Footer Axis */}
       <div className="px-8 pb-8 flex justify-between text-[10px] font-black text-slate-300 uppercase tracking-widest border-t border-slate-50 pt-4">
-         <span>Início: {minDate.toLocaleDateString('pt-BR')}</span>
+         <span>Início: {formatDate(minDate.toISOString().split('T')[0])}</span>
          <span>Redville Obras - Cronograma Automático</span>
-         <span>Fim: {maxDate.toLocaleDateString('pt-BR')}</span>
+         <span>Fim: {formatDate(maxDate.toISOString().split('T')[0])}</span>
       </div>
     </div>
   );
@@ -789,7 +796,7 @@ function CaixaTab({ projectCode }) {
             {entries.map(e => (
               <tr key={e.id} className="hover:bg-slate-50/30 transition-colors">
                 <td className="py-4 px-6 text-slate-500 font-medium">
-                  {new Date(e.date).toLocaleDateString()}
+                  {formatDate(e.date)}
                 </td>
                 <td className="py-4 px-4">
                   <p className="font-bold text-slate-800">{e.description}</p>

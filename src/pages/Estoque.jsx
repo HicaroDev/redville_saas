@@ -1,6 +1,18 @@
 import { useState } from 'react';
 import { Package, Plus, Search, History, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Building2, Filter, Save, X, Layers, Pencil, Trash2, Link as LinkIcon, DollarSign as DollarIcon } from 'lucide-react';
-import { useStock, useStockMovements, createStockMovement, useDirectory, useProjects, updateDirectoryItem, deleteDirectoryItem, useCashbook } from '../hooks/useData';
+import { useStock, useStockMovements, createStockMovement, useDirectory, useProjects, updateDirectoryItem, deleteDirectoryItem, useCashbook, createDirectoryItem } from '../hooks/useData';
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  // Adiciona T00:00:00 para garantir que o navegador interprete como horário local e não UTC
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('pt-BR');
+}
+
+function getLocalDate() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 export default function EstoquePage() {
   const [activeTab, setActiveTab] = useState('saldo'); // 'saldo' ou 'movimentacoes'
@@ -22,50 +34,66 @@ export default function EstoquePage() {
     quantity: '',
     type: 'entrada',
     description: '',
-    entry_date: new Date().toISOString().split('T')[0],
+    entry_date: getLocalDate(),
     cashbook_entry_id: ''
   });
 
   const [materialForm, setMaterialForm] = useState({
+    material_id: '',
     name: '',
     unit: '',
     category: 'material',
-    addInitialStock: false,
-    initialQuantity: '',
+    quantity: '',
     project_id: '',
-    cashbook_entry_id: ''
+    cashbook_entry_id: '',
+    description: ''
   });
 
   const handleSaveMaterial = async (e) => {
     e.preventDefault();
+    if (!materialForm.material_id && !materialForm.name) {
+        alert('Selecione ou digite um nome para o material');
+        return;
+    }
+    
     setIsSubmitting(true);
     
-    const { data: newItem, error } = await createDirectoryItem({
-        name: materialForm.name,
-        unit: materialForm.unit,
-        category: materialForm.category
+    let materialId = materialForm.material_id;
+    
+    // Se não tem ID mas tem nome, tenta criar no diretório primeiro (opcional, mas mantém flexibilidade)
+    if (!materialId) {
+        const { data: newItem, error: dirError } = await createDirectoryItem({
+            name: materialForm.name,
+            unit: materialForm.unit,
+            category: materialForm.category
+        });
+        if (dirError) {
+            alert('Erro ao criar material no cadastro geral: ' + dirError.message);
+            setIsSubmitting(false);
+            return;
+        }
+        materialId = newItem.id;
+    }
+
+    // Cria a movimentação de entrada (saldo inicial/compra)
+    const { error: stockError } = await createStockMovement({
+        material_id: materialId,
+        project_id: (materialForm.project_id === 'deposito_central' || materialForm.project_id === 'no_fornecedor') ? null : materialForm.project_id,
+        quantity: materialForm.quantity,
+        type: 'entrada',
+        description: materialForm.description || (materialForm.project_id === 'deposito_central' ? 'Entrada em Depósito / Base' : materialForm.project_id === 'no_fornecedor' ? 'Aguardando retirada no fornecedor' : 'Entrada via Cadastro de Material'),
+        cashbook_entry_id: materialForm.cashbook_entry_id || null,
+        entry_date: new Date().toISOString().split('T')[0]
     });
 
-    if (!error && newItem) {
-       // Se o usuário optou por adicionar saldo inicial
-       if (materialForm.addInitialStock && materialForm.project_id && materialForm.initialQuantity) {
-           await createStockMovement({
-               material_id: newItem.id,
-               project_id: materialForm.project_id,
-               quantity: materialForm.initialQuantity,
-               type: 'entrada',
-               description: 'Entrada Inicial no Cadastro',
-               cashbook_entry_id: materialForm.cashbook_entry_id || null,
-               entry_date: new Date().toISOString().split('T')[0]
-           });
-       }
-
+    if (!stockError) {
        setShowMaterialModal(false);
-       setMaterialForm({ name: '', unit: '', category: 'material', addInitialStock: false, initialQuantity: '', project_id: '', cashbook_entry_id: '' });
+       setMaterialForm({ material_id: '', name: '', unit: '', category: 'material', quantity: '', project_id: '', cashbook_entry_id: '', description: '' });
        refetchMaterials();
        refetchStock();
+       refetchMovements();
     } else {
-       alert('Erro ao cadastrar material: ' + (error?.message || 'Erro desconhecido'));
+       alert('Erro ao registrar no estoque: ' + stockError.message);
     }
     setIsSubmitting(false);
   };
@@ -283,7 +311,7 @@ export default function EstoquePage() {
                 ) : movements.map(mov => (
                   <tr key={mov.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-8 py-5">
-                      <p className="text-xs font-bold text-slate-700">{new Date(mov.entry_date).toLocaleDateString()}</p>
+                      <p className="text-xs font-bold text-slate-700">{formatDate(mov.entry_date)}</p>
                     </td>
                     <td className="px-8 py-5">
                       <p className="text-sm font-bold text-slate-900 leading-tight">{mov.directory?.name}</p>
@@ -528,92 +556,144 @@ export default function EstoquePage() {
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 italic text-left">Base de Dados Geral</p>
                    </div>
                 </div>
-                <button onClick={() => setShowMaterialModal(false)} className="w-10 h-10 hover:bg-white hover:shadow-md rounded-2xl transition-all flex items-center justify-center"><X className="w-5 h-5 text-slate-400" /></button>
+                <button onClick={() => setShowMaterialModal(false)} className="w-10 h-10 hover:bg-white hover:shadow-md rounded-2xl transition-all flex items-center justify-center">
+                  <X className="w-5 h-5 text-slate-400" />
+                </button>
              </div>
 
              <form onSubmit={handleSaveMaterial} className="p-10 space-y-6">
                 <div className="space-y-4">
+                    {/* BUSCA NO CADASTRO GERAL */}
                     <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Nome do Material / Insumo</label>
-                        <input 
-                            type="text" 
-                            required 
-                            placeholder="Ex: Cimento CP-II, Tijolo 8 Furos, Areia..." 
-                            className="form-input" 
-                            value={materialForm.name} 
-                            onChange={e => setMaterialForm({...materialForm, name: e.target.value})} 
-                        />
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Nome do Material / Insumo (Cadastro Geral)</label>
+                        <div className="relative group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
+                            <input 
+                                type="text"
+                                required
+                                placeholder="Digite para buscar ou cadastrar novo..."
+                                className="form-input pl-11 !bg-white focus:!border-red-600/30 font-bold text-slate-800"
+                                value={materialForm.name}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    const match = materials.find(m => m.name.toLowerCase() === val.toLowerCase());
+                                    if (match) {
+                                        setMaterialForm({
+                                            ...materialForm,
+                                            name: match.name,
+                                            material_id: match.id,
+                                            unit: match.unit || ''
+                                        });
+                                    } else {
+                                        setMaterialForm({
+                                            ...materialForm,
+                                            name: val,
+                                            material_id: ''
+                                        });
+                                    }
+                                }}
+                                list="modal-materials-list"
+                            />
+                            <datalist id="modal-materials-list">
+                                {materials.map(m => (
+                                    <option key={m.id} value={m.name}>{m.unit ? `(${m.unit})` : ''}</option>
+                                ))}
+                            </datalist>
+                        </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Unidade de Medida</label>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Quantidade</label>
+                            <input 
+                                type="number" 
+                                required 
+                                step="0.01"
+                                placeholder="0.00" 
+                                className="form-input font-black text-lg" 
+                                value={materialForm.quantity} 
+                                onChange={e => setMaterialForm({...materialForm, quantity: e.target.value})} 
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Unidade</label>
                             <input 
                                 type="text" 
                                 required
-                                placeholder="Ex: m2, kg, un, m3..." 
-                                className="form-input font-medium" 
+                                placeholder="Ex: un, kg, m2..." 
+                                className="form-input bg-slate-50 font-bold text-slate-600" 
                                 value={materialForm.unit} 
                                 onChange={e => setMaterialForm({...materialForm, unit: e.target.value})} 
                             />
                         </div>
                     </div>
 
-                    {/* VINCULO INICIAL OPCIONAL */}
-                    <div className="pt-4 border-t border-slate-100">
-                        <label className="flex items-center gap-2 cursor-pointer group">
-                             <input 
-                                type="checkbox" 
-                                className="w-5 h-5 rounded-lg border-slate-200 text-red-700 focus:ring-red-600 transition-all cursor-pointer"
-                                checked={materialForm.addInitialStock}
-                                onChange={e => setMaterialForm({...materialForm, addInitialStock: e.target.checked})}
-                             />
-                             <span className="text-xs font-bold text-slate-500 uppercase tracking-widest group-hover:text-red-700 transition-colors">Vincular Compra e Saldo Inicial?</span>
+                    <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Localização Atual / Obra de Destino</label>
+                        <select 
+                            required
+                            className="form-input" 
+                            value={materialForm.project_id} 
+                            onChange={e => setMaterialForm({...materialForm, project_id: e.target.value})}
+                        >
+                            <option value="">Selecione o Destino...</option>
+                            <optgroup label="Bases Internas">
+                                <option value="deposito_central">Depósito Central / Base</option>
+                                <option value="no_fornecedor">No Fornecedor (Pendente Retirada)</option>
+                            </optgroup>
+                            <optgroup label="Obras em Andamento">
+                                {projects.map(p => (
+                                    <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
+                                ))}
+                            </optgroup>
+                        </select>
+                        <p className="text-[9px] text-slate-400 mt-1 px-1 italic">Indique para onde este material está indo no momento.</p>
+                    </div>
+
+                    <div className="space-y-1 p-4 bg-red-50/30 rounded-2xl border border-red-100/50">
+                        <label className="flex items-center gap-2 text-[10px] font-bold text-red-800 uppercase tracking-widest px-1 mb-2">
+                            <LinkIcon className="w-3 h-3" /> Buscar e Vincular Compra (Financeiro)
                         </label>
-
-                        {materialForm.addInitialStock && (
-                            <div className="mt-6 space-y-6 p-6 bg-slate-50 rounded-[2rem] border border-slate-100 animate-in slide-in-from-top-4 duration-300">
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Obra de Destino</label>
-                                    <select 
-                                        required={materialForm.addInitialStock}
-                                        className="form-input bg-white" 
-                                        value={materialForm.project_id} 
-                                        onChange={e => setFormData({...materialForm, project_id: e.target.value})}
-                                    >
-                                        <option value="">Selecione a Obra</option>
-                                        {projects.map(p => (
-                                            <option key={p.id} value={p.id}>{p.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Qtd Inicial</label>
-                                        <input 
-                                            type="number" 
-                                            required={materialForm.addInitialStock}
-                                            placeholder="0" 
-                                            className="form-input bg-white" 
-                                            value={materialForm.initialQuantity} 
-                                            onChange={e => setMaterialForm({...materialForm, initialQuantity: e.target.value})} 
-                                        />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1 italic">Vincular à uma Compra</label>
-                                        <select 
-                                            className="form-input bg-white text-[10px]" 
-                                            value={materialForm.cashbook_entry_id} 
-                                            onChange={e => setMaterialForm({...materialForm, cashbook_entry_id: e.target.value})}
-                                        >
-                                            <option value="">Nenhuma vínculo (Opcional)</option>
-                                            {purchases.filter(p => p.category === 'despesa').slice(0, 10).map(p => (
-                                                <option key={p.id} value={p.id}>{p.payee_name} - R$ {p.total_out}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                </div>
-                                <p className="text-[9px] text-red-600 font-medium px-1 underline uppercase">Isso criará uma entrada automática no estoque após o cadastro.</p>
+                        <div className="relative group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-red-300 pointer-events-none" />
+                            <input 
+                                type="text"
+                                placeholder="Digite o item comprado, fornecedor ou data..."
+                                className="form-input pl-11 bg-white border-red-100 focus:!border-red-600/30 text-[11px]"
+                                value={purchases.find(p => p.id === materialForm.cashbook_entry_id) ? `${formatDate(purchases.find(p => p.id === materialForm.cashbook_entry_id).date)} - ${purchases.find(p => p.id === materialForm.cashbook_entry_id).origin}: R$ ${purchases.find(p => p.id === materialForm.cashbook_entry_id).total_out} (${purchases.find(p => p.id === materialForm.cashbook_entry_id).description})` : ''}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (!val) {
+                                        setMaterialForm({...materialForm, cashbook_entry_id: ''});
+                                        return;
+                                    }
+                                    // Busca avançada: tenta achar por match exato do valor concatenado
+                                    const match = purchases.find(p => `${formatDate(p.date)} - ${p.origin}: R$ ${p.total_out} (${p.description})` === val);
+                                    if (match) {
+                                        setMaterialForm({
+                                            ...materialForm, 
+                                            cashbook_entry_id: match.id,
+                                            description: `Referente a: ${match.description} (${match.origin})`
+                                        });
+                                    }
+                                }}
+                                list="modal-purchases-list"
+                            />
+                            <datalist id="modal-purchases-list">
+                                {purchases
+                                    .filter(p => p.total_out > 0)
+                                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                                    .slice(0, 100)
+                                    .map(p => (
+                                    <option key={p.id} value={`${formatDate(p.date)} - ${p.origin}: R$ ${p.total_out} (${p.description})`}>
+                                        {p.projects?.code ? `Obra: ${p.projects.code} | ` : ''}{p.description}
+                                    </option>
+                                ))}
+                            </datalist>
+                        </div>
+                        {materialForm.cashbook_entry_id && (
+                            <div className="mt-2 flex items-center gap-1.5 px-2 py-1 bg-red-100 rounded-lg w-fit animate-in fade-in zoom-in-95">
+                                <span className="text-[9px] font-black text-red-800 uppercase tracking-tighter">Compra Vinculada</span>
                             </div>
                         )}
                     </div>
@@ -636,7 +716,7 @@ export default function EstoquePage() {
                         Salvar Material
                     </button>
                 </div>
-             </form>
+              </form>
           </div>
         </div>
       )}

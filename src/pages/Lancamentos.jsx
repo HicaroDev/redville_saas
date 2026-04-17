@@ -7,9 +7,16 @@ import {
 
 const PAYMENT_METHODS = ['PIX', 'Boleto', 'Cartão', 'Transferência', 'Dinheiro'];
 
-function formatCurrency(value) {
-  if (value == null) return '—';
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  // Adiciona T00:00:00 para garantir que o navegador interprete como horário local e não UTC
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('pt-BR');
+}
+
+function getLocalDate() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
 export default function LancamentosPage() {
@@ -30,7 +37,7 @@ export default function LancamentosPage() {
   const [formData, setFormData] = useState({
     project_id: '',
     description: '',
-    entry_date: new Date().toISOString().split('T')[0],
+    entry_date: getLocalDate(),
     amount: '',
     payment_method: 'PIX',
     wallet_id: '',
@@ -103,7 +110,20 @@ export default function LancamentosPage() {
     if (!error) {
        setShowForm(false);
         setEditingEntry(null);
-        setFormData({ project_id: '', description: '', entry_date: new Date().toISOString().split('T')[0], amount: '', payment_method: 'PIX', wallet_id: '', payee_name: '', payer_name: '', category: 'despesa', contract_id: null, provider_id: null, payee_type: 'fornecedor' });
+        setFormData({ 
+          project_id: '', 
+          description: '', 
+          entry_date: getLocalDate(), 
+          amount: '', 
+          payment_method: 'PIX', 
+          wallet_id: '', 
+          payee_name: '', 
+          payer_name: '', 
+          category: 'despesa', 
+          contract_id: null, 
+          provider_id: null, 
+          payee_type: 'fornecedor' 
+        });
         refetch();
     } else {
        alert("Erro ao salvar: " + error.message);
@@ -248,7 +268,7 @@ export default function LancamentosPage() {
                 const isExpense = entry.expense_amount > 0;
                 return (
                   <tr key={entry.id} className="hover:bg-slate-50/30 transition-colors">
-                    <td className="py-3 px-6 text-slate-400 font-medium">{new Date(entry.entry_date).toLocaleDateString()}</td>
+                    <td className="py-3 px-6 text-slate-400 font-medium">{formatDate(entry.entry_date)}</td>
                     <td className="py-3 px-4 font-bold text-slate-700">{entry.projects?.code || '—'}</td>
                     <td className="py-3 px-4">
                       <p className="font-semibold text-slate-800">{entry.description}</p>

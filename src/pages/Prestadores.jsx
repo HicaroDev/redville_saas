@@ -11,6 +11,18 @@ function formatCurrency(v) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
 }
 
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  // Adiciona T00:00:00 para garantir que o navegador interprete como horário local e não UTC
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('pt-BR');
+}
+
+function getLocalDate() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 export default function PrestadoresPage() {
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +53,7 @@ export default function PrestadoresPage() {
     service_type: 'Empreita',
     description: '',
     total_agreed_value: '',
-    start_date: new Date().toISOString().split('T')[0],
+    start_date: getLocalDate(),
     status: 'ativo',
     contract_url: ''
   });
@@ -140,7 +152,7 @@ export default function PrestadoresPage() {
     if (!error) {
       setShowContractModal(false);
       fetchProviders();
-      setContractData({ id: null, provider_id: '', project_id: '', service_type: 'Empreita', description: '', total_agreed_value: '', start_date: new Date().toISOString().split('T')[0], status: 'ativo', contract_url: '' });
+      setContractData({ id: null, provider_id: '', project_id: '', service_type: 'Empreita', description: '', total_agreed_value: '', start_date: getLocalDate(), status: 'ativo', contract_url: '' });
     } else {
       alert('Erro: ' + error.message);
     }
@@ -260,7 +272,7 @@ export default function PrestadoresPage() {
                    <h4 className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] italic">Dossiê de Contratos</h4>
                    <button 
                     onClick={() => {
-                        setContractData({ id: null, provider_id: p.id, project_id: '', service_type: 'Empreita', description: '', total_agreed_value: '', start_date: new Date().toISOString().split('T')[0], status: 'ativo', contract_url: '' });
+                        setContractData({ id: null, provider_id: p.id, project_id: '', service_type: 'Empreita', description: '', total_agreed_value: '', start_date: getLocalDate(), status: 'ativo', contract_url: '' });
                         setShowContractModal(true);
                     }}
                     className="flex items-center gap-1.5 text-[10px] text-red-700 font-bold uppercase hover:bg-red-50 px-3 py-1.5 rounded-lg transition-all"
@@ -379,7 +391,7 @@ export default function PrestadoresPage() {
                                <tbody className="divide-y divide-slate-100">
                                   {p.payments_history.map(pay => (
                                      <tr key={pay.id} className="hover:bg-white transition-colors">
-                                        <td className="py-2.5 px-3 font-medium text-slate-500">{new Date(pay.entry_date).toLocaleDateString()}</td>
+                                        <td className="py-2.5 px-3 font-medium text-slate-500">{formatDate(pay.entry_date)}</td>
                                         <td className="py-2.5 px-3">
                                            <p className="font-bold text-slate-700 truncate max-w-[120px]">{pay.description}</p>
                                            <p className="text-[8px] text-slate-400 font-bold uppercase tracking-tighter">{pay.projects?.code}</p>

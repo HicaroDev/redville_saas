@@ -424,7 +424,7 @@ export default function EstoquePage() {
                     {formData.type === 'entrada' && (
                         <div className="space-y-1 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
                             <label className="flex items-center gap-2 text-[10px] font-bold text-emerald-700 uppercase tracking-widest px-1 mb-2">
-                                <LinkIcon className="w-3 h-3" /> Vincular à uma Compra (Financeiro)
+                                <LinkIcon className="w-3 h-3" /> Vincular à uma Compra (Financeiro - Opcional)
                             </label>
                             <select 
                                 className="form-input bg-white border-emerald-100" 
@@ -652,7 +652,7 @@ export default function EstoquePage() {
 
                     <div className="space-y-1 p-4 bg-red-50/30 rounded-2xl border border-red-100/50">
                         <label className="flex items-center gap-2 text-[10px] font-bold text-red-800 uppercase tracking-widest px-1 mb-2">
-                            <LinkIcon className="w-3 h-3" /> Buscar e Vincular Compra (Financeiro)
+                            <LinkIcon className="w-3 h-3" /> Buscar e Vincular Compra (Financeiro - Opcional)
                         </label>
                         <div className="relative group">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-red-300 pointer-events-none" />

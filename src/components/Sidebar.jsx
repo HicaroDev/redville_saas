@@ -63,7 +63,7 @@ export default function Sidebar({ activePage, onMenuChange }) {
             {!collapsed && (
               <div className="flex flex-col gap-0.5">
                 <img src="/logo.png" alt="Redville" className="h-15 w-auto" onError={(e) => e.target.style.display='none'} />
-                <span className="text-[9px] font-black text-slate-400 ml-0.5 tracking-widest uppercase">v1.07</span>
+                <span className="text-[9px] font-black text-slate-400 ml-0.5 tracking-widest uppercase">v1.08</span>
               </div>
             )}
             <button onClick={() => setCollapsed(!collapsed)} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400">
